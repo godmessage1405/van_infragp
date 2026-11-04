@@ -258,6 +258,20 @@ export class PaymentSessionRepository {
     });
   }
 
+  updateMetadata(sessionId, patch = {}) {
+    const session = this.findById(sessionId);
+    if (!session) return null;
+    const currentMeta = typeof session.metadata === 'object' && session.metadata !== null ? session.metadata : {};
+    const updatedMeta = { ...currentMeta, ...patch };
+    const now = new Date().toISOString();
+    this.db.execute(`
+      UPDATE payment_sessions
+      SET metadata = ?, updated_at = ?
+      WHERE id = ?
+    `, [JSON.stringify(updatedMeta), now, sessionId]);
+    return this.findById(sessionId);
+  }
+
   findCurrentActiveOrProcessing(receivingAccountId) {
     const row = this.db.queryOne(`
       SELECT * FROM payment_sessions

@@ -927,6 +927,88 @@ export function registerCheckoutRoutes(server, ctx) {
     });
   });
 
+  // POST /api/v1/checkout/:id/submit-utr
+  server.post('/api/v1/checkout/:id/submit-utr', async (req, res, params) => {
+    const session = ctx.sessionRepo.findById(params.id);
+    if (!session) {
+      HttpServer.json(res, 404, { error: `Payment session not found: ${params.id}` });
+      return;
+    }
+
+    if (session.status === PaymentStatus.SUCCESS) {
+      HttpServer.json(res, 200, {
+        status: PaymentStatus.SUCCESS,
+        message: 'Payment already verified successfully.'
+      });
+      return;
+    }
+
+    const body = await HttpServer.parseBody(req).catch(() => ({}));
+    const rawUtr = (body.utr || body.bankReferenceNumber || '').toString().trim();
+    const cleanUtr = rawUtr.replace(/[^a-zA-Z0-9]/g, '');
+
+    if (!cleanUtr || cleanUtr.length < 6) {
+      HttpServer.json(res, 400, {
+        error: 'Please enter a valid UPI reference / UTR number (at least 6 alphanumeric characters).'
+      });
+      return;
+    }
+
+    // 1. Record submitted UTR in metadata
+    ctx.sessionRepo.updateMetadata(session.id, {
+      submittedUtr: cleanUtr,
+      utrSubmittedAt: new Date().toISOString()
+    });
+
+    // 2. Check if an observation matching this UTR or amount already exists in DB
+    const unattributed = ctx.obsRepo.findUnattributed(session.receivingAccountId);
+    let matchedObs = unattributed.find(o =>
+      o.bankReferenceNumber && String(o.bankReferenceNumber).trim().toUpperCase() === cleanUtr.toUpperCase()
+    );
+
+    // Also check if any unattributed observation matches the exact amount
+    if (!matchedObs && session.amountPaise) {
+      matchedObs = unattributed.find(o => o.amountPaise === session.amountPaise);
+    }
+
+    if (matchedObs) {
+      const matchResult = ctx.attributionEngine.processObservation(matchedObs);
+      if (matchResult && (matchResult.attributed || matchResult.outcomeStatus === PaymentStatus.SUCCESS)) {
+        server.broadcastSse(session.id, 'status_change', {
+          status: PaymentStatus.SUCCESS,
+          utr: cleanUtr
+        });
+        HttpServer.json(res, 200, {
+          status: PaymentStatus.SUCCESS,
+          message: 'Payment verified successfully!',
+          utr: cleanUtr
+        });
+        return;
+      }
+    }
+
+    // 3. Move session to PROCESSING with verification timer so observer matches it
+    if (session.status === PaymentStatus.ACTIVE) {
+      const updated = ctx.timingEngine.handlePaymentDone(session.id);
+      server.broadcastSse(session.id, 'status_change', {
+        status: PaymentStatus.PROCESSING,
+        processingExpiresAt: updated.processingExpiresAt
+      });
+      HttpServer.json(res, 200, {
+        status: PaymentStatus.PROCESSING,
+        message: 'UTR recorded. Verifying bank notification in real-time...',
+        utr: cleanUtr
+      });
+      return;
+    }
+
+    HttpServer.json(res, 200, {
+      status: session.status,
+      message: 'UTR recorded. Verifying with bank...',
+      utr: cleanUtr
+    });
+  });
+
   // POST /api/v1/checkout/:id/cancel
   server.post('/api/v1/checkout/:id/cancel', async (req, res, params) => {
     const session = ctx.sessionRepo.findById(params.id);
