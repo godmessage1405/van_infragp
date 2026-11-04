@@ -37,6 +37,14 @@ if not exist "node_modules\" (
     echo.
 )
 
+:: Ensure native modules match current Node.js version
+node -e "try { require('better-sqlite3'); } catch(e) { process.exit(1); }" >nul 2>nul
+if %ERRORLEVEL% NEQ 0 (
+    echo [*] Rebuilding native modules for this Node.js version...
+    call npm rebuild better-sqlite3
+    echo.
+)
+
 :: 3. Ensure data directory exists
 if not exist "data\" (
     mkdir data 2>nul
