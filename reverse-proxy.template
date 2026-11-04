@@ -1,0 +1,26 @@
+pg.infravan.tech {
+    # 1. Admin Login & Dashboard APIs (Port 6001)
+    handle /admin* {
+        reverse_proxy localhost:6001
+    }
+    handle /login* {
+        reverse_proxy localhost:6001
+    }
+    handle /logout* {
+        reverse_proxy localhost:6001
+    }
+    handle /api/admin/* {
+        reverse_proxy localhost:6001
+    }
+    handle /api/services/* {
+        reverse_proxy localhost:6001
+    }
+    handle /api/logs/* {
+        reverse_proxy localhost:6001
+    }
+
+    # 2. Public Checkout Portal, youpi.js SDK & Payment APIs (Port 7000)
+    handle {
+        reverse_proxy localhost:7000
+    }
+}

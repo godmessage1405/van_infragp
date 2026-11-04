@@ -43,21 +43,38 @@ echo [*] Clearing stale processes from ports...
 taskkill /F /IM node.exe >nul 2>nul
 timeout /t 1 /nobreak >nul
 
-:: 5. Launch Caddy Reverse Proxy if present
-if exist "caddy.exe" (
-    if exist "Caddyfile" (
-        echo [*] Starting Caddy SSL Reverse Proxy in background...
-        start "" caddy.exe run
+:: 5. Setup & Launch Caddy Reverse Proxy for pg.infravan.tech
+if not exist "Caddyfile" (
+    if exist "reverse-proxy.template" (
+        echo [*] Initializing Caddyfile configuration for pg.infravan.tech...
+        copy /Y "reverse-proxy.template" "Caddyfile" >nul
     )
+)
+
+if not exist "caddy.exe" (
+    where caddy >nul 2>nul
+    if %ERRORLEVEL% NEQ 0 (
+        echo [*] Caddy reverse proxy not detected. Downloading caddy.exe for SSL...
+        powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri 'https://caddyserver.com/api/download?os=windows&arch=amd64' -OutFile 'caddy.exe'"
+    )
+)
+
+if exist "caddy.exe" (
+    echo [*] Starting Caddy SSL Reverse Proxy for pg.infravan.tech...
+    start "" caddy.exe run
 )
 
 :: 6. Launch Infravan PG Gateway Services
 echo.
 echo ============================================================
 echo   Starting all Infravan PG Gateway Services...
-echo   - Merchant Panel:     http://localhost:6001
-echo   - Payment Core API:   http://localhost:6100
-echo   - Checkout Portal:    http://localhost:7000
+echo   - Public Domain:      https://pg.infravan.tech
+echo   - Admin Portal:       https://pg.infravan.tech/login
+echo   - Internal Admin:     http://localhost:6001
+echo   - Internal Checkout:  http://localhost:7000
+echo   - Internal Core API:  http://localhost:6100
+echo   - Control Center:     http://localhost:8090
+echo ============================================================
 echo   - Control Center:     http://localhost:8090
 echo   - Gmail Observer:     http://localhost:6003
 echo   - SMS Observer:       http://localhost:6002
