@@ -4119,11 +4119,11 @@
           </div>
 
           <!-- Big Action Button to Launch UPI App -->
-          <button type="button" id="dlLaunchAppBtn" onclick="launchTargetUpiApp()"
-            style="width:100%; display:flex; align-items:center; justify-content:center; gap:8px; background:linear-gradient(135deg, #10b981 0%, #059669 100%); border:none; color:#ffffff; font-weight:800; font-size:15px; padding:13px 16px; border-radius:10px; cursor:pointer; box-shadow:0 4px 14px rgba(16, 185, 129, 0.4); margin-bottom:14px;">
+          <a id="dlLaunchAppBtn" href="#" target="_top" onclick="launchTargetUpiApp(event)"
+            style="width:100%; display:flex; align-items:center; justify-content:center; gap:8px; background:linear-gradient(135deg, #10b981 0%, #059669 100%); border:none; color:#ffffff; font-weight:800; font-size:15px; padding:13px 16px; border-radius:10px; cursor:pointer; box-shadow:0 4px 14px rgba(16, 185, 129, 0.4); margin-bottom:14px; text-decoration:none; box-sizing:border-box;">
             <span>🚀</span>
             <span id="dlLaunchBtnText">Open PhonePe Now</span>
-          </button>
+          </a>
 
           <!-- Real-Time Auto-Verification & UTR Section -->
           <div style="border-top:1px dashed rgba(255, 255, 255, 0.12); padding-top:14px; text-align:center;">
@@ -7020,54 +7020,125 @@
     } catch (e) { }
 
     let currentTargetUri = null;
+    let currentFallbackUri = null;
+
+    function dispatchUpiIntent(uri, fallback) {
+      if (!uri) return;
+
+      // Method 1: Invisible top-level anchor click (most reliable in Android Chrome & iframes)
+      try {
+        const a = document.createElement('a');
+        a.href = uri;
+        a.target = '_top';
+        a.rel = 'noopener noreferrer';
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => {
+          try { document.body.removeChild(a); } catch {}
+        }, 500);
+      } catch (err) {
+        console.warn('Anchor intent dispatch error:', err);
+      }
+
+      // Method 2: Direct window.top / window.location fallback after short tick
+      setTimeout(() => {
+        try {
+          if (window.top && window.top !== window) {
+            window.top.location.href = uri;
+          } else {
+            window.location.href = uri;
+          }
+        } catch {
+          try { window.location.href = uri; } catch {}
+        }
+      }, 120);
+
+      // Method 3: Fallback scheme if primary intent was blocked or app not captured
+      if (fallback && fallback !== uri) {
+        setTimeout(() => {
+          if (!document.hidden) {
+            try {
+              const fb = document.createElement('a');
+              fb.href = fallback;
+              fb.target = '_top';
+              document.body.appendChild(fb);
+              fb.click();
+              setTimeout(() => {
+                try { document.body.removeChild(fb); } catch {}
+              }, 500);
+            } catch {}
+          }
+        }, 1200);
+      }
+    }
 
     function openUpiApp(provider) {
-      const vpa = (state && (state.payeeVpa || state.vpa)) || '{{VPA}}';
-      const name = (state && state.merchantName) || '{{MERCHANT_NAME}}';
+      const rawVpa = (state && (state.payeeVpa || state.vpa)) || '{{VPA}}';
+      const cleanVpa = String(rawVpa).trim();
+      const rawName = (state && state.merchantName) || '{{MERCHANT_NAME}}';
+      const cleanName = String(rawName).trim();
       const amount = (state && state.amount) || '{{AMOUNT}}';
+      const cleanAmt = String(amount).replace(/[^0-9.]/g, '');
 
       // CRITICAL FIX: Omit 'am' (amount) and 'tn' (order note) from deep link!
       // This launches the app in safe P2P Send Money mode with recipient preselected.
       // PhonePe Protect and Paytm Protect NEVER flag this, eliminating all security decline alerts!
-      const upiQuery = 'pa=' + encodeURIComponent(vpa) +
-        '&pn=' + encodeURIComponent(name) +
+      // Keep '@' literal in VPA so UPI apps and intent filters parse payee accurately.
+      const upiQuery = 'pa=' + cleanVpa +
+        '&pn=' + encodeURIComponent(cleanName) +
         '&cu=INR';
 
-      const genericUri = 'upi://pay?' + upiQuery;
-      const isAndroid = /android/i.test(navigator.userAgent);
-      const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+      const isAndroid = /android/i.test(navigator.userAgent || '');
+      const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent || '');
 
-      let targetUri = genericUri;
+      let targetUri = 'upi://pay?' + upiQuery;
+      let fallbackUri = 'upi://pay?' + upiQuery;
       let targetName = 'UPI App';
       let targetIcon = '/icons/upi.svg';
 
       if (provider === 'phonepe') {
-        targetUri = 'phonepe://pay?' + upiQuery;
+        targetUri = isAndroid
+          ? 'intent://pay?' + upiQuery + '#Intent;scheme=upi;package=com.phonepe.app;end'
+          : 'phonepe://pay?' + upiQuery;
+        fallbackUri = 'phonepe://pay?' + upiQuery;
         targetName = 'PhonePe';
         targetIcon = '/icons/phonepe.png';
       } else if (provider === 'gpay') {
         targetUri = isAndroid
           ? 'intent://pay?' + upiQuery + '#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end'
           : 'gpay://upi/pay?' + upiQuery;
+        fallbackUri = 'gpay://upi/pay?' + upiQuery;
         targetName = 'Google Pay';
         targetIcon = '/icons/gpay.png';
       } else if (provider === 'paytm') {
-        targetUri = 'paytmmp://pay?' + upiQuery;
+        targetUri = isAndroid
+          ? 'intent://pay?' + upiQuery + '#Intent;scheme=upi;package=net.one97.paytm;end'
+          : 'paytmmp://pay?' + upiQuery;
+        fallbackUri = 'paytmmp://pay?' + upiQuery;
         targetName = 'Paytm';
         targetIcon = '/icons/paytm.png';
-      } else if (provider === 'any') {
+      } else {
+        targetUri = isAndroid
+          ? 'intent://pay?' + upiQuery + '#Intent;scheme=upi;end'
+          : 'upi://pay?' + upiQuery;
+        fallbackUri = 'upi://pay?' + upiQuery;
         targetName = 'Any UPI App';
         targetIcon = '/icons/upi.svg';
       }
 
       currentTargetUri = targetUri;
+      currentFallbackUri = fallbackUri;
 
-      // Copy exact amount to clipboard immediately for convenient pasting
+      // 1. Copy exact amount to clipboard immediately
       if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(String(amount).replace(/[^0-9.]/g, '')).catch(() => {});
+        navigator.clipboard.writeText(cleanAmt).catch(() => {
+          fallbackCopyText(cleanAmt);
+        });
+      } else {
+        fallbackCopyText(cleanAmt);
       }
 
-      // Populate & open the Pay & Amount instruction screen
+      // 2. Populate and open the instruction modal
       const modal = document.getElementById('ypgDeepLinkModal');
       if (modal) {
         const iconEl = document.getElementById('dlAppIcon');
@@ -7077,6 +7148,7 @@
         const targetAppEl = document.getElementById('dlTargetAppName');
         const stepAmtEl = document.getElementById('dlStepAmount');
         const launchTextEl = document.getElementById('dlLaunchBtnText');
+        const launchBtn = document.getElementById('dlLaunchAppBtn');
 
         if (iconEl) {
           iconEl.src = targetIcon;
@@ -7086,16 +7158,17 @@
         }
         if (titleEl) titleEl.textContent = 'Pay with ' + targetName;
         if (amtEl) amtEl.textContent = '₹' + amount;
-        if (payeeEl) payeeEl.textContent = name;
+        if (payeeEl) payeeEl.textContent = cleanName;
         if (targetAppEl) targetAppEl.textContent = targetName;
         if (stepAmtEl) stepAmtEl.textContent = '₹' + amount;
         if (launchTextEl) launchTextEl.textContent = 'Open ' + targetName + ' Now';
+        if (launchBtn) launchBtn.href = targetUri;
 
         modal.removeAttribute('hidden');
-      } else {
-        // Fallback: direct launch if modal not present
-        window.location.href = targetUri;
       }
+
+      // 3. Immediately launch the target UPI app!
+      dispatchUpiIntent(targetUri, fallbackUri);
     }
 
     function closeDeepLinkModal() {
@@ -7103,9 +7176,9 @@
       if (modal) modal.setAttribute('hidden', '');
     }
 
-    function launchTargetUpiApp() {
+    function launchTargetUpiApp(e) {
       if (currentTargetUri) {
-        window.location.href = currentTargetUri;
+        dispatchUpiIntent(currentTargetUri, currentFallbackUri);
       }
     }
 
