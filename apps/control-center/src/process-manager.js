@@ -166,11 +166,15 @@ export class ProcessManager extends EventEmitter {
 
     child.stdout?.on('data', data => {
       this.appendLog(svc.id, 'stdout', data);
-      process.stdout.write([] );
+      try {
+        process.stdout.write('[' + svc.name + '] ' + String(data));
+      } catch {}
     });
     child.stderr?.on('data', data => {
       this.appendLog(svc.id, 'stderr', data);
-      process.stderr.write([] );
+      try {
+        process.stderr.write('[' + svc.name + '] ' + String(data));
+      } catch {}
     });
 
     child.on('exit', (code, signal) => {
