@@ -146,6 +146,11 @@ export class GmailPoller {
       parsed = BankEmailParser.parse(email);
     } catch {}
 
+    // Ignore non-banking emails (e.g. security alerts, newsletters, logins)
+    if (!parsed || !parsed.amountPaise) {
+      return null;
+    }
+
     let targetAccountId = this.receivingAccountId;
     try {
       const activeAcct = await this.resolveActiveReceivingAccount();
@@ -238,7 +243,10 @@ export class GmailPoller {
             headers: { 'Authorization': `Bearer ${accessToken}` },
             signal: AbortSignal.timeout(8000)
           });
-          if (!msgRes.ok) continue;
+          if (!msgRes.ok) {
+            this.processedMessageIds.add(m.id);
+            continue;
+          }
 
           const msgData = await msgRes.json();
           const headers = msgData.payload?.headers || [];
@@ -255,14 +263,14 @@ export class GmailPoller {
             from,
             date: dateStr ? new Date(dateStr) : new Date(Number(msgData.internalDate || Date.now()))
           });
-
+        } catch (msgErr) {
+          console.warn(`[Gmail Observer] Error fetching message ${m.id}:`, msgErr.message);
+        } finally {
           this.processedMessageIds.add(m.id);
-          if (this.processedMessageIds.size > 500) {
+          if (this.processedMessageIds.size > 1000) {
             const firstKey = this.processedMessageIds.values().next().value;
             this.processedMessageIds.delete(firstKey);
           }
-        } catch (msgErr) {
-          console.warn(`[Gmail Observer] Error fetching message ${m.id}:`, msgErr.message);
         }
       }
     } catch (err) {

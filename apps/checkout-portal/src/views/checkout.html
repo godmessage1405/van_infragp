@@ -5663,6 +5663,19 @@
         }
 
         if (!res.ok) {
+          const bodyEl = document.querySelector('.ypg-body');
+          if (bodyEl) {
+            bodyEl.innerHTML = `
+              <div style="text-align:center; padding:50px 20px; color:#475569;">
+                <div style="font-size:46px; margin-bottom:14px;">⌛</div>
+                <div style="font-size:16px; font-weight:700; color:#0f172a; margin-bottom:6px;">Payment Link Expired or Not Found</div>
+                <div style="font-size:13px; color:#64748b; max-width:320px; margin:0 auto 22px; line-height:1.5;">
+                  This checkout session has expired after the 5-minute window or is invalid. Please start a new payment.
+                </div>
+                <a href="/" style="display:inline-block; background:#fe932c; color:#fff; text-decoration:none; font-weight:600; padding:10px 24px; border-radius:8px; font-size:13px; transition:opacity 0.15s;">Create New Payment</a>
+              </div>
+            `;
+          }
           dismissSplashScreen();
           return;
         }

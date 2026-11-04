@@ -118,6 +118,19 @@ export function registerPollerRoutes(server, ctx) {
         }
       }
 
+      if (!amountPaise && body.amount) {
+        try { amountPaise = toPaise(body.amount); } catch {}
+      }
+
+      if (!amountPaise) {
+        HttpServer.json(res, 200, {
+          accepted: false,
+          reason: 'NO_VALID_MONETARY_CREDIT',
+          message: 'Ignored non-monetary or non-credit message'
+        });
+        return;
+      }
+
       const normalized = ObservationNormalizer.normalize({
         source: body.source,
         receivingAccountId: body.receivingAccountId,

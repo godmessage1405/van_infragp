@@ -46,6 +46,37 @@ export class CheckoutServer {
     this.template = fs.readFileSync(this.htmlTemplatePath, 'utf8');
   }
 
+  renderNotFoundHtml(paymentId) {
+    const appName = process.env.GATEWAY_TITLE || 'Infravan PG';
+    return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Payment Session Not Found | ${appName}</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0b1329; color: #f8fafc; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
+    .card { background: #111d3d; border: 1px solid #1e293b; border-radius: 20px; padding: 40px 28px; max-width: 440px; width: 100%; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
+    .icon { font-size: 52px; margin-bottom: 16px; line-height: 1; }
+    h1 { font-size: 21px; margin: 0 0 10px; font-weight: 700; color: #fff; }
+    p { font-size: 14px; color: #94a3b8; margin: 0 0 22px; line-height: 1.5; }
+    .session-id { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; background: #070d1e; padding: 8px 12px; border-radius: 8px; color: #38bdf8; word-break: break-all; margin-bottom: 24px; border: 1px solid #1e293b; }
+    .btn { display: inline-block; background: #fe932c; color: #fff; text-decoration: none; font-weight: 600; padding: 12px 28px; border-radius: 10px; font-size: 14px; transition: transform 0.15s, opacity 0.15s; }
+    .btn:hover { opacity: 0.92; transform: translateY(-1px); }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="icon">⌛</div>
+    <h1>Payment Session Not Found</h1>
+    <p>This payment link is invalid, has already completed, or has expired after the checkout window.</p>
+    <div class="session-id">Session: ${paymentId}</div>
+    <a href="/" class="btn">Create New Payment</a>
+  </div>
+</body>
+</html>`;
+  }
+
   renderDirectPayHtml() {
     try {
       let html = fs.readFileSync(this.directPayTemplatePath, 'utf8');

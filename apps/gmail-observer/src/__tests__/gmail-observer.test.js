@@ -127,5 +127,16 @@ describe('Gmail Payment Observer Integration Tests', () => {
       const updated = apiInstance.app.context.sessionRepo.findById(session.id);
       assert.equal(updated.status, PaymentStatus.SUCCESS);
     });
+
+    test('processEmail cleanly ignores non-banking notification emails without error or crash', async () => {
+      const nonBankEmail = {
+        subject: 'Security alert: You allowed infravan.tech access to your Google Account',
+        body: 'If you did not grant this permission, please review your Google account security settings immediately.',
+        from: 'no-reply@accounts.google.com'
+      };
+
+      const result = await gmailInstance.poller.processEmail(nonBankEmail);
+      assert.equal(result, null);
+    });
   });
 });
