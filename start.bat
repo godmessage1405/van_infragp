@@ -5,6 +5,9 @@ color 0A
 :: Always execute in the folder where this batch script lives
 cd /d "%~dp0"
 
+:: Ensure common Node.js and Git installation paths are loaded
+set "PATH=%PATH%;C:\Program Files\nodejs;C:\Program Files\Git\cmd;C:\Program Files\Git\bin;%LOCALAPPDATA%\Programs\node;%APPDATA%\npm"
+
 echo ============================================================
 echo           INFRAVAN PG - SERVER GATEWAY LAUNCHER
 echo      Infravan Technologies - Sovereign Payment Hub
@@ -17,7 +20,7 @@ where node >nul 2>nul
 if %ERRORLEVEL% NEQ 0 (
     color 0C
     echo [ERROR] Node.js is not found in PATH!
-    echo Please ensure Node.js (v20+) is installed.
+    echo Please ensure Node.js is installed on this system.
     echo.
     pause
     exit /b 1

@@ -16,3 +16,4 @@ taskkill /F /IM caddy.exe >nul 2>nul
 echo [✓] Infravan PG Server and Reverse Proxy stopped cleanly.
 echo.
 timeout /t 3
+
