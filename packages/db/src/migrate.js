@@ -150,13 +150,13 @@ export function runMigrations(targetDb) {
 
   // Seed default customer if none exists
   const customerRepo = new CustomerRepository(db);
-  const existingCust = customerRepo.findByMobile('9212339720');
+  const existingCust = customerRepo.findByMobile('9876543210');
   if (!existingCust) {
     customerRepo.create({
       id: '00000000-0000-0000-0000-000000000002',
-      name: 'Gaurav Mehra',
-      email: 'gauravmehra09876@gmail.com',
-      mobileNumber: '9212339720',
+      name: 'Demo Customer',
+      email: 'customer@youpi.local',
+      mobileNumber: '9876543210',
       isPhoneVerified: true
     });
   }
