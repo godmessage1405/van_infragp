@@ -150,15 +150,17 @@ export function runMigrations(targetDb) {
 
   // Seed default customer if none exists
   const customerRepo = new CustomerRepository(db);
-  const existingCust = customerRepo.findByMobile('9876543210');
+  const existingCust = customerRepo.findById('00000000-0000-0000-0000-000000000002') || customerRepo.findByMobile('9876543210');
   if (!existingCust) {
-    customerRepo.create({
-      id: '00000000-0000-0000-0000-000000000002',
-      name: 'Demo Customer',
-      email: 'customer@youpi.local',
-      mobileNumber: '9876543210',
-      isPhoneVerified: true
-    });
+    try {
+      customerRepo.create({
+        id: '00000000-0000-0000-0000-000000000002',
+        name: 'Demo Customer',
+        email: 'customer@youpi.local',
+        mobileNumber: '9876543210',
+        isPhoneVerified: true
+      });
+    } catch {}
   }
 
   return {
