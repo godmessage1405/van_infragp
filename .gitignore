@@ -11,6 +11,10 @@ node_modules/
 .env.production
 .env.production.local
 
+# Web Server & Reverse Proxy (Caddy / Nginx)
+caddy*
+Caddyfile*
+
 # Databases and Local State
 data/*.sqlite*
 data/*.db*
