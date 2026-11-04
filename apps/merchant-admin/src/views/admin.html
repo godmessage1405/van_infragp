@@ -6191,7 +6191,15 @@
           showAdminToast('Error: ' + (data.error || 'Failed to create session'), 'error');
           return;
         }
-        const url = data.checkoutUrl;
+        const host = window.location.hostname;
+        const proto = window.location.protocol;
+        let url;
+        if (host.includes('localhost') || host.includes('127.0.0.1')) {
+          url = data.checkoutUrl || `/checkout/${data.paymentId}`;
+        } else {
+          const checkoutHost = host.replace(/^pg-admin\./i, 'pg.').replace(/^pg-api\./i, 'pg.');
+          url = `${proto}//${checkoutHost}/checkout/${data.paymentId}`;
+        }
         const resultDiv = document.getElementById('quickPayResult');
         const urlEl = document.getElementById('quickPayUrl');
         const linkEl = document.getElementById('quickPayLink');

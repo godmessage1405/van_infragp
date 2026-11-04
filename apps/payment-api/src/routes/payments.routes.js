@@ -16,12 +16,28 @@ import { isTerminalStatus, toPublicOutcome } from '@youpi/core';
  * }} ctx
  */
 export function registerPaymentRoutes(server, ctx) {
-  function resolveCheckoutBaseUrl(merchant) {
+  function resolveCheckoutBaseUrl(merchant, req = null) {
+    // 1. If request came from a public domain via reverse proxy (e.g. pg-api.infravan.tech, pg.infravan.tech)
+    const forwardedHost = req?.headers?.['x-forwarded-host'] || req?.headers?.['host'];
+    const proto = req?.headers?.['x-forwarded-proto'] || (req?.socket?.encrypted ? 'https' : 'http');
+    if (forwardedHost && !forwardedHost.includes('localhost') && !forwardedHost.includes('127.0.0.1')) {
+      const checkoutHost = forwardedHost.replace(/^pg-api./i, 'pg.').replace(/^pg-admin./i, 'pg.');
+      return `${proto}://${checkoutHost}`;
+    }
+
+    // 2. Check merchant branding
     if (merchant?.branding) {
       try {
         const urls = resolveRuntimeUrls(merchant.branding);
-        if (urls && urls.checkoutUrl) return urls.checkoutUrl;
+        if (urls && urls.checkoutUrl && !urls.checkoutUrl.includes('localhost')) {
+          return urls.checkoutUrl;
+        }
       } catch {}
+    }
+
+    // 3. Fallback to env or context
+    if (process.env.PUBLIC_CHECKOUT_URL) {
+      return process.env.PUBLIC_CHECKOUT_URL;
     }
     return ctx.checkoutBaseUrl || 'http://localhost:7000';
   }
@@ -76,7 +92,7 @@ export function registerPaymentRoutes(server, ctx) {
           amountPaise: existing.amountPaise.toString(),
           currency: existing.currency,
           status: existing.status,
-          checkoutUrl: `${resolveCheckoutBaseUrl(merchant)}/checkout/${existing.id}`
+          checkoutUrl: `${resolveCheckoutBaseUrl(merchant, req)}/checkout/${existing.id}`
         });
         return;
       }
@@ -121,7 +137,7 @@ export function registerPaymentRoutes(server, ctx) {
           currency: existing.currency,
           status: existing.status,
           activeSessionDetected: true,
-          checkoutUrl: `${resolveCheckoutBaseUrl(merchant)}/checkout/${existing.id}`
+          checkoutUrl: `${resolveCheckoutBaseUrl(merchant, req)}/checkout/${existing.id}`
         });
         return;
       }
@@ -262,7 +278,7 @@ export function registerPaymentRoutes(server, ctx) {
       currency: session.currency,
       status: queueResult.status,
       queuePosition: queueResult.queuePosition,
-      checkoutUrl: `${resolveCheckoutBaseUrl(merchant)}/checkout/${session.id}`
+      checkoutUrl: `${resolveCheckoutBaseUrl(merchant, req)}/checkout/${session.id}`
     });
   });
 

@@ -486,8 +486,8 @@
           throw new Error(data.error || 'Failed to create payment session');
         }
 
-        // Direct to standard checkout page!
-        const targetUrl = data.checkoutUrl || `/checkout/${data.paymentId}`;
+        // Direct to standard checkout page on the current origin!
+        const targetUrl = `/checkout/${data.paymentId}`;
         window.location.href = targetUrl;
       } catch (err) {
         alert('Payment Error: ' + err.message);
@@ -506,3 +506,4 @@
   </script>
 </body>
 </html>
+
