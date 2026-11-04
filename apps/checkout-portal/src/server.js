@@ -41,8 +41,22 @@ export class CheckoutServer {
 
     this.apiBaseUrl = options.apiBaseUrl || process.env.BASE_PAYMENT_API_URL || 'http://localhost:6100';
     this.htmlTemplatePath = path.join(__dirname, 'views', 'checkout.html');
+    this.directPayTemplatePath = path.join(__dirname, 'views', 'direct-pay.html');
     this.sdkScriptPath = path.join(__dirname, 'sdk', 'youpi-checkout.js');
     this.template = fs.readFileSync(this.htmlTemplatePath, 'utf8');
+  }
+
+  renderDirectPayHtml() {
+    try {
+      let html = fs.readFileSync(this.directPayTemplatePath, 'utf8');
+      const appName = process.env.GATEWAY_TITLE || 'Infravan PG';
+      const merchantName = process.env.MERCHANT_BUSINESS_NAME || 'Infravan Technologies';
+      html = html.replaceAll('{{APP_NAME}}', appName);
+      html = html.replaceAll('{{MERCHANT_NAME}}', merchantName);
+      return html;
+    } catch {
+      return '<h1>Direct Pay Portal</h1>';
+    }
   }
 
   async fetchPaymentState(paymentId) {
@@ -230,6 +244,20 @@ export class CheckoutServer {
           'Access-Control-Allow-Origin': '*'
         });
         res.end(svg);
+        return;
+      }
+
+      // Direct Pay Portal: GET / or GET /pay or GET /direct-pay
+      if (pathname === '/' || pathname === '/pay' || pathname === '/direct-pay') {
+        const rendered = this.renderDirectPayHtml();
+        res.writeHead(200, {
+          'Content-Type': 'text/html; charset=utf-8',
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+          'Pragma': 'no-cache',
+          'Expires': '0',
+          'Access-Control-Allow-Origin': '*'
+        });
+        res.end(rendered);
         return;
       }
 

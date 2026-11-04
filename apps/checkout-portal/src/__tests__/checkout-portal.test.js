@@ -61,6 +61,15 @@ describe('Checkout Portal Integration Tests', () => {
       assert.equal(json.service, 'checkout-portal');
     });
 
+    test('GET / renders Direct Pay portal for custom instant payments', async () => {
+      const res = await get('/');
+      assert.equal(res.status, 200);
+      assert.ok(res.headers['content-type'].includes('text/html'));
+      assert.ok(res.text.includes('Instant UPI Payment Portal') || res.text.includes('Instant UPI Checkout'));
+      assert.ok(res.text.includes('id="amountInput"'));
+      assert.ok(res.text.includes('id="btnPay"'));
+    });
+
     test('GET /checkout/:id renders responsive HTML with injected payment ID', async () => {
       const testPaymentId = 'pay_test_uuid_12345';
       const res = await get(`/checkout/${testPaymentId}`);

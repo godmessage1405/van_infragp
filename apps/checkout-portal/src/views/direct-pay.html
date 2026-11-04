@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>{{APP_NAME}} — Instant UPI Payment Portal</title>
+  <link rel="icon" href="/icons/gpay.png" />
+  <style>
+    :root {
+      --primary: #fe932c;
+      --primary-hover: #e07a1b;
+      --bg: #090d16;
+      --card-bg: rgba(15, 23, 42, 0.94);
+      --card-border: rgba(254, 147, 44, 0.25);
+      --card-glow: rgba(254, 147, 44, 0.15);
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --input-bg: #020617;
+      --input-border: #334155;
+      --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: var(--font);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background: var(--bg);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(254, 147, 44, 0.12) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(59, 130, 246, 0.08) 0px, transparent 50%),
+        radial-gradient(at 50% 50%, rgba(15, 23, 42, 0.6) 0px, transparent 100%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem 1rem;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 460px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 2rem 1.75rem;
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7), 0 0 30px var(--card-glow);
+      backdrop-filter: blur(16px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #fe932c, #3b82f6, #10b981);
+    }
+
+    .brand-header {
+      text-align: center;
+      margin-bottom: 1.75rem;
+    }
+
+    .brand-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--primary);
+      background: rgba(254, 147, 44, 0.12);
+      border: 1px solid rgba(254, 147, 44, 0.3);
+      padding: 0.3rem 0.75rem;
+      border-radius: 999px;
+      margin-bottom: 0.75rem;
+    }
+
+    .brand-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.25rem;
+    }
+
+    .brand-subtitle {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .amount-box {
+      background: var(--input-bg);
+      border: 2px solid var(--input-border);
+      border-radius: 14px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1rem;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .amount-box:focus-within {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(254, 147, 44, 0.15);
+    }
+
+    .currency-symbol {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--primary);
+      user-select: none;
+      margin-right: 0.5rem;
+    }
+
+    .amount-input {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #ffffff;
+      font-size: 2.2rem;
+      font-weight: 800;
+      width: 100%;
+      letter-spacing: -0.02em;
+    }
+
+    .amount-input::placeholder {
+      color: #475569;
+    }
+
+    .amount-chips {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .chip {
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #cbd5e1;
+      padding: 0.45rem 0.25rem;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.15s ease;
+      user-select: none;
+    }
+
+    .chip:hover {
+      background: #334155;
+      color: #ffffff;
+      border-color: #64748b;
+    }
+
+    .chip.active {
+      background: rgba(254, 147, 44, 0.2);
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      margin-bottom: 0.4rem;
+    }
+
+    .form-input {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--input-border);
+      color: #ffffff;
+      padding: 0.75rem 1rem;
+      border-radius: 10px;
+      font-size: 0.92rem;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .form-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(254, 147, 44, 0.12);
+    }
+
+    .btn-pay {
+      width: 100%;
+      background: linear-gradient(135deg, #fe932c 0%, #ea580c 100%);
+      color: #ffffff;
+      border: none;
+      padding: 1rem 1.25rem;
+      border-radius: 12px;
+      font-size: 1.05rem;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 8px 24px -4px rgba(254, 147, 44, 0.45);
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-top: 1.25rem;
+    }
+
+    .btn-pay:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 28px -4px rgba(254, 147, 44, 0.6);
+    }
+
+    .btn-pay:active {
+      transform: translateY(1px);
+    }
+
+    .btn-pay:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .supported-apps {
+      margin-top: 1.75rem;
+      padding-top: 1.25rem;
+      border-top: 1px solid rgba(51, 65, 85, 0.6);
+      text-align: center;
+    }
+
+    .supported-apps-title {
+      font-size: 0.72rem;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.75rem;
+    }
+
+    .apps-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.85rem;
+      opacity: 0.85;
+    }
+
+    .app-icon {
+      width: 26px;
+      height: 26px;
+      border-radius: 6px;
+      object-fit: contain;
+    }
+
+    .app-text {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #94a3b8;
+    }
+
+    .trust-footer {
+      text-align: center;
+      margin-top: 1.5rem;
+      font-size: 0.75rem;
+      color: #64748b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+    }
+
+    .trust-footer span {
+      color: #10b981;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <div class="brand-header">
+        <div class="brand-badge">⚡ Instant UPI Checkout</div>
+        <h1 class="brand-title">{{MERCHANT_NAME}}</h1>
+        <p class="brand-subtitle">Enter amount and pay securely using any UPI app</p>
+      </div>
+
+      <form id="directPayForm" onsubmit="handleDirectPay(event)">
+        <!-- Amount Input -->
+        <label class="form-label">Payment Amount</label>
+        <div class="amount-box">
+          <span class="currency-symbol">₹</span>
+          <input 
+            type="number" 
+            id="amountInput" 
+            class="amount-input" 
+            placeholder="100" 
+            min="1" 
+            step="any"
+            required 
+            autofocus
+            oninput="updatePayButton()"
+          />
+        </div>
+
+        <!-- Quick Chips -->
+        <div class="amount-chips">
+          <div class="chip" onclick="setAmount(100)">₹100</div>
+          <div class="chip" onclick="setAmount(200)">₹200</div>
+          <div class="chip" onclick="setAmount(500)">₹500</div>
+          <div class="chip" onclick="setAmount(1000)">₹1,000</div>
+        </div>
+
+        <!-- Payer Name -->
+        <div class="form-group">
+          <label class="form-label" for="payerName">Your Name (Optional)</label>
+          <input 
+            type="text" 
+            id="payerName" 
+            class="form-input" 
+            placeholder="e.g. Mohit" 
+          />
+        </div>
+
+        <!-- Payer Phone / WhatsApp -->
+        <div class="form-group">
+          <label class="form-label" for="payerPhone">Mobile Number (Optional)</label>
+          <input 
+            type="tel" 
+            id="payerPhone" 
+            class="form-input" 
+            placeholder="e.g. 9876543210" 
+            pattern="[0-9]{10}"
+            maxlength="10"
+          />
+        </div>
+
+        <!-- Purpose / Note -->
+        <div class="form-group">
+          <label class="form-label" for="payerNote">Payment Note (Optional)</label>
+          <input 
+            type="text" 
+            id="payerNote" 
+            class="form-input" 
+            placeholder="e.g. Test Payment / Invoice" 
+          />
+        </div>
+
+        <!-- Pay Button -->
+        <button type="submit" id="btnPay" class="btn-pay">
+          <span id="btnPayIcon">🔒</span>
+          <span id="btnPayText">Pay ₹100 via UPI</span>
+        </button>
+      </form>
+
+      <!-- Supported Apps -->
+      <div class="supported-apps">
+        <div class="supported-apps-title">Supported UPI Apps & Methods</div>
+        <div class="apps-row">
+          <img src="/icons/gpay.png" class="app-icon" alt="GPay" onerror="this.style.display='none'" />
+          <img src="/icons/phonepe.png" class="app-icon" alt="PhonePe" onerror="this.style.display='none'" />
+          <img src="/icons/paytm.png" class="app-icon" alt="Paytm" onerror="this.style.display='none'" />
+          <span class="app-text">BHIM</span>
+          <span class="app-text">•</span>
+          <span class="app-text">CRED</span>
+          <span class="app-text">•</span>
+          <span class="app-text">Any Bank UPI</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Trust Footer -->
+    <div class="trust-footer">
+      <span>🛡️</span> 256-Bit Bank Grade Encryption • Sovereign & Zero Fee Gateway
+    </div>
+  </div>
+
+  <script>
+    // Prefill from URL search params if present: ?amount=500&name=Mohit&note=Test
+    const params = new URLSearchParams(window.location.search);
+    const initialAmount = params.get('amount') || '100';
+    const initialName = params.get('name') || '';
+    const initialPhone = params.get('phone') || '';
+    const initialNote = params.get('note') || '';
+
+    const amountInput = document.getElementById('amountInput');
+    const payerName = document.getElementById('payerName');
+    const payerPhone = document.getElementById('payerPhone');
+    const payerNote = document.getElementById('payerNote');
+    const btnPay = document.getElementById('btnPay');
+    const btnPayText = document.getElementById('btnPayText');
+    const btnPayIcon = document.getElementById('btnPayIcon');
+
+    if (amountInput) amountInput.value = initialAmount;
+    if (payerName) payerName.value = initialName;
+    if (payerPhone) payerPhone.value = initialPhone;
+    if (payerNote) payerNote.value = initialNote;
+
+    function setAmount(amt) {
+      if (amountInput) {
+        amountInput.value = amt;
+        updatePayButton();
+        amountInput.focus();
+      }
+      document.querySelectorAll('.chip').forEach(c => {
+        if (c.textContent.trim() === '₹' + amt.toLocaleString('en-IN')) {
+          c.classList.add('active');
+        } else {
+          c.classList.remove('active');
+        }
+      });
+    }
+
+    function updatePayButton() {
+      const val = parseFloat(amountInput.value || '0');
+      if (val > 0) {
+        btnPayText.textContent = `Pay ₹${val.toLocaleString('en-IN')} via UPI`;
+        btnPay.disabled = false;
+      } else {
+        btnPayText.textContent = 'Enter Amount';
+        btnPay.disabled = true;
+      }
+    }
+
+    updatePayButton();
+
+    async function handleDirectPay(e) {
+      e.preventDefault();
+      const amountVal = parseFloat(amountInput.value || '0');
+      if (!amountVal || amountVal <= 0) {
+        alert('Please enter a valid amount.');
+        amountInput.focus();
+        return;
+      }
+
+      btnPay.disabled = true;
+      btnPayIcon.textContent = '⏳';
+      btnPayText.textContent = 'Generating Secure Checkout...';
+
+      const orderId = 'ORD-' + Date.now().toString(36).toUpperCase() + '-' + Math.floor(Math.random() * 900 + 100);
+      const name = payerName.value.trim() || 'Direct Payer';
+      const phone = payerPhone.value.trim();
+      const note = payerNote.value.trim() || 'Direct Portal Payment';
+
+      try {
+        const res = await fetch('/api/v1/payments', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            orderId,
+            amount: amountVal,
+            currency: 'INR',
+            customer: {
+              name,
+              phone: phone ? ('+91' + phone.replace(/^(\+91|0)/, '')) : undefined
+            },
+            metadata: {
+              note,
+              source: 'DIRECT_PAY_PORTAL'
+            }
+          })
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || 'Failed to create payment session');
+        }
+
+        // Direct to standard checkout page!
+        const targetUrl = data.checkoutUrl || `/checkout/${data.paymentId}`;
+        window.location.href = targetUrl;
+      } catch (err) {
+        alert('Payment Error: ' + err.message);
+        btnPay.disabled = false;
+        btnPayIcon.textContent = '🔒';
+        updatePayButton();
+      }
+    }
+
+    // Auto-trigger if ?auto=true or ?pay=1 is passed
+    if (params.get('auto') === 'true' || params.get('pay') === '1') {
+      setTimeout(() => {
+        handleDirectPay(new Event('submit'));
+      }, 300);
+    }
+  </script>
+</body>
+</html>
