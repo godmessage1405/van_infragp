@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Merchant Portal & Control Hub — YOUPI PG</title>
+  <title>Merchant Portal & Control Hub — INFRAVAN PG</title>
   <style>
     :root,
     [data-theme="light"] {
@@ -22,7 +22,7 @@
       --bg-input: #ffffff;
 
       --border: #e2e8f0;
-      --border-focus: #2563eb;
+      --border-focus: #fe932c;
       --border-subtle: #edf2f7;
       --border-hover: #cbd5e1;
 
@@ -31,10 +31,10 @@
       --text-dim: #94a3b8;
       --text-heading: #0f172a;
 
-      --primary: #2563eb;
-      --primary-hover: #1d4ed8;
-      --primary-glow: rgba(37, 99, 235, 0.2);
-      --primary-light: rgba(37, 99, 235, 0.08);
+      --primary: #fe932c;
+      --primary-hover: #e07a1b;
+      --primary-glow: rgba(254, 147, 44, 0.25);
+      --primary-light: rgba(254, 147, 44, 0.08);
 
       --success: #059669;
       --success-glow: rgba(5, 150, 105, 0.2);
@@ -114,10 +114,10 @@
       --text-dim: #64748b;
       --text-heading: #ffffff;
 
-      --primary: #2563eb;
-      --primary-hover: #1d4ed8;
-      --primary-glow: rgba(37, 99, 235, 0.25);
-      --primary-light: rgba(56, 189, 248, 0.08);
+      --primary: #fe932c;
+      --primary-hover: #e07a1b;
+      --primary-glow: rgba(254, 147, 44, 0.25);
+      --primary-light: rgba(254, 147, 44, 0.08);
 
       --success: #10b981;
       --success-glow: rgba(16, 185, 129, 0.2);
@@ -979,8 +979,22 @@
   <!-- TOP HEADER -->
   <header>
     <div class="brand-group">
-      <div class="brand-title">
-        <span>🛡️ YOUPI PG</span>
+      <div class="brand-title" style="display:flex; align-items:center; gap:9px;">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="28" height="28" style="vertical-align:middle; flex-shrink:0;">
+          <defs>
+            <linearGradient id="admin-infravan-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#0e1728"/>
+              <stop offset="100%" stop-color="#040810"/>
+            </linearGradient>
+            <linearGradient id="admin-infravan-core" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#ffaa44"/>
+              <stop offset="100%" stop-color="#fe932c"/>
+            </linearGradient>
+          </defs>
+          <rect x="2" y="2" width="28" height="28" rx="7" fill="url(#admin-infravan-bg)" stroke="#fe932c" stroke-width="1.2" stroke-opacity="0.35"/>
+          <rect x="9.5" y="9.5" width="13" height="13" rx="3" fill="url(#admin-infravan-core)"/>
+        </svg>
+        <span style="font-weight:800; letter-spacing:-0.02em;">INFRAVAN <span style="color:var(--primary);">PG</span></span>
       </div>
       <span class="brand-badge">Merchant &amp; Supervisor Hub</span>
     </div>
@@ -1020,6 +1034,12 @@
         <div class="pulse-dot"></div>
         <span>Live Syncing</span>
       </div>
+
+      <!-- Secure Sign Out Pill -->
+      <button class="btn btn-secondary" onclick="logoutAdmin()" style="padding:0.25rem 0.65rem; font-size:0.75rem; border-radius:9999px; display:inline-flex; align-items:center; gap:0.35rem; cursor:pointer;" title="Sign out of Admin Panel">
+        <span>🔒</span>
+        <span>Logout</span>
+      </button>
     </div>
   </header>
 
@@ -7058,6 +7078,25 @@
     setInterval(loadServices, 5000);
     setInterval(fetchFalseNarrativeStatus, 15000);
     setInterval(fetchTestModeStatus, 15000);
+
+    async function logoutAdmin() {
+      try {
+        await fetch("/api/admin/logout", { method: "POST" });
+      } catch {}
+      try {
+        localStorage.removeItem("youpi_admin_token");
+      } catch {}
+      window.location.href = "/login";
+    }
+
+    const _origFetch = window.fetch;
+    window.fetch = async function(...args) {
+      const res = await _origFetch.apply(this, args);
+      if (res.status === 401 && !window.location.pathname.startsWith("/login")) {
+        window.location.href = "/login";
+      }
+      return res;
+    };
   </script>
 
 </body>

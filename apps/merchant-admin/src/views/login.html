@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Merchant Admin Login — Sovereign Gateway</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #0b0f19;
+      --card-bg: rgba(17, 24, 39, 0.85);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --primary: #fe932c;
+      --primary-hover: #ea7a10;
+      --primary-glow: rgba(254, 147, 44, 0.35);
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --input-bg: #0d1527;
+      --input-border: #1e293b;
+      --input-focus: #fe932c;
+      --danger: #ef4444;
+      --danger-bg: rgba(239, 68, 68, 0.12);
+      --danger-border: rgba(239, 68, 68, 0.35);
+      --success: #10b981;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      background-color: var(--bg);
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(254, 147, 44, 0.12) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(37, 99, 235, 0.08) 0px, transparent 50%),
+        radial-gradient(at 50% 50%, rgba(15, 23, 42, 0.6) 0px, transparent 100%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    .bg-grid {
+      position: absolute;
+      inset: 0;
+      background-size: 32px 32px;
+      background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      pointer-events: none;
+    }
+
+    .login-container {
+      width: 100%;
+      max-width: 440px;
+      position: relative;
+      z-index: 10;
+    }
+
+    .brand-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .logo-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 56px;
+      height: 56px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(254, 147, 44, 0.15), rgba(254, 147, 44, 0.05));
+      border: 1px solid rgba(254, 147, 44, 0.3);
+      margin-bottom: 1rem;
+      box-shadow: 0 8px 24px var(--primary-glow);
+    }
+
+    .brand-title {
+      font-size: 1.6rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: var(--text);
+    }
+
+    .brand-title span {
+      color: var(--primary);
+    }
+
+    .brand-subtitle {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      margin-top: 0.35rem;
+      font-weight: 500;
+    }
+
+    .login-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: 20px;
+      padding: 2.25rem 2rem;
+      box-shadow: 
+        0 20px 40px -15px rgba(0, 0, 0, 0.5),
+        0 0 0 1px rgba(255, 255, 255, 0.04);
+    }
+
+    .card-heading {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 0.35rem;
+    }
+
+    .card-desc {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #cbd5e1;
+      margin-bottom: 0.45rem;
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    .form-input {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--input-border);
+      border-radius: 10px;
+      padding: 0.75rem 1rem;
+      font-size: 0.92rem;
+      color: var(--text);
+      font-family: inherit;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .form-input:focus {
+      border-color: var(--input-focus);
+      box-shadow: 0 0 0 3px rgba(254, 147, 44, 0.18);
+      background: #111a33;
+    }
+
+    .form-input::placeholder {
+      color: #64748b;
+    }
+
+    .toggle-password {
+      position: absolute;
+      right: 0.85rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: #64748b;
+      cursor: pointer;
+      font-size: 0.9rem;
+      padding: 0.25rem;
+      display: flex;
+      align-items: center;
+      transition: color 0.15s;
+    }
+
+    .toggle-password:hover {
+      color: var(--text);
+    }
+
+    .form-row-options {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: -0.25rem;
+      margin-bottom: 1.5rem;
+      font-size: 0.82rem;
+    }
+
+    .remember-label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      color: #94a3b8;
+      user-select: none;
+    }
+
+    .remember-checkbox {
+      accent-color: var(--primary);
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .btn-submit {
+      width: 100%;
+      background: var(--primary);
+      color: #0b0f19;
+      border: none;
+      border-radius: 10px;
+      padding: 0.82rem;
+      font-size: 0.95rem;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 14px var(--primary-glow);
+    }
+
+    .btn-submit:hover:not(:disabled) {
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px var(--primary-glow);
+    }
+
+    .btn-submit:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(11, 15, 25, 0.25);
+      border-top-color: #0b0f19;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      display: none;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .error-alert {
+      display: none;
+      background: var(--danger-bg);
+      border: 1px solid var(--danger-border);
+      color: #fca5a5;
+      border-radius: 10px;
+      padding: 0.75rem 1rem;
+      font-size: 0.84rem;
+      margin-bottom: 1.25rem;
+      line-height: 1.4;
+      animation: fadeIn 0.2s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .security-notice {
+      text-align: center;
+      margin-top: 1.5rem;
+      font-size: 0.75rem;
+      color: #64748b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+    }
+
+    .security-notice span.dot {
+      color: var(--success);
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-grid"></div>
+
+  <div class="login-container">
+    <div class="brand-header">
+      <div class="logo-badge">
+        <svg width="30" height="30" viewBox="0 0 32 32" fill="none">
+          <defs>
+            <linearGradient id="login-infravan-core" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#ffaa44"/>
+              <stop offset="100%" stop-color="#fe932c"/>
+            </linearGradient>
+          </defs>
+          <rect x="2" y="2" width="28" height="28" rx="7" fill="rgba(254, 147, 44, 0.15)" stroke="#fe932c" stroke-width="1.2" stroke-opacity="0.4"/>
+          <rect x="9.5" y="9.5" width="13" height="13" rx="3" fill="url(#login-infravan-core)"/>
+        </svg>
+      </div>
+      <h1 class="brand-title">YOUPI <span>PG</span></h1>
+      <p class="brand-subtitle">Merchant &amp; Supervisor Control Hub</p>
+    </div>
+
+    <div class="login-card">
+      <h2 class="card-heading">Sign In</h2>
+      <p class="card-desc">Enter your administrator credentials to access the gateway.</p>
+
+      <div class="error-alert" id="errorAlert"></div>
+
+      <form id="loginForm" onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label class="form-label" for="adminEmail">Admin Email</label>
+          <div class="input-wrapper">
+            <input 
+              type="email" 
+              id="adminEmail" 
+              class="form-input" 
+              placeholder="admin@youpi.local" 
+              required 
+              autocomplete="username"
+              autofocus
+            />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="adminPassword">Master Password</label>
+          <div class="input-wrapper">
+            <input 
+              type="password" 
+              id="adminPassword" 
+              class="form-input" 
+              placeholder="••••••••••••" 
+              required 
+              autocomplete="current-password"
+            />
+            <button type="button" class="toggle-password" onclick="togglePasswordVisibility()" title="Show/Hide Password">
+              <span id="eyeIcon">👁️</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="form-row-options">
+          <label class="remember-label">
+            <input type="checkbox" id="rememberMe" class="remember-checkbox" checked />
+            <span>Remember session on this device (30 Days)</span>
+          </label>
+        </div>
+
+        <button type="submit" class="btn-submit" id="submitBtn">
+          <span class="spinner" id="spinner"></span>
+          <span id="btnText">Sign In to Admin Panel</span>
+        </button>
+      </form>
+    </div>
+
+    <div class="security-notice">
+      <span class="dot">●</span>
+      <span>256-Bit Encrypted Session • Self-Hosted &amp; Private</span>
+    </div>
+  </div>
+
+  <script>
+    function togglePasswordVisibility() {
+      const pwd = document.getElementById('adminPassword');
+      const eye = document.getElementById('eyeIcon');
+      if (pwd.type === 'password') {
+        pwd.type = 'text';
+        eye.textContent = '🙈';
+      } else {
+        pwd.type = 'password';
+        eye.textContent = '👁️';
+      }
+    }
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      const email = document.getElementById('adminEmail').value.trim();
+      const password = document.getElementById('adminPassword').value;
+      const rememberMe = document.getElementById('rememberMe').checked;
+
+      const submitBtn = document.getElementById('submitBtn');
+      const spinner = document.getElementById('spinner');
+      const btnText = document.getElementById('btnText');
+      const errorAlert = document.getElementById('errorAlert');
+
+      errorAlert.style.display = 'none';
+      errorAlert.textContent = '';
+      submitBtn.disabled = true;
+      spinner.style.display = 'inline-block';
+      btnText.textContent = 'Authenticating...';
+
+      try {
+        const res = await fetch('/api/admin/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ email, password, rememberMe })
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok) {
+          throw new Error(data.message || data.error || 'Authentication failed. Please check your credentials.');
+        }
+
+        // Store token in localStorage as client-side backup
+        if (data.token) {
+          try {
+            localStorage.setItem('youpi_admin_token', data.token);
+          } catch {}
+        }
+
+        btnText.textContent = 'Success! Redirecting...';
+        window.location.href = '/admin';
+      } catch (err) {
+        errorAlert.textContent = err.message;
+        errorAlert.style.display = 'block';
+        submitBtn.disabled = false;
+        spinner.style.display = 'none';
+        btnText.textContent = 'Sign In to Admin Panel';
+      }
+    }
+  </script>
+</body>
+</html>
+

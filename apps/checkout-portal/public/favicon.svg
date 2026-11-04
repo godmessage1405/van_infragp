@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <defs>
+    <linearGradient id="infravan-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0e1728"/>
+      <stop offset="100%" stop-color="#040810"/>
+    </linearGradient>
+    <linearGradient id="infravan-core" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffaa44"/>
+      <stop offset="100%" stop-color="#fe932c"/>
+    </linearGradient>
+    <filter id="core-glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="1" stdDeviation="1.5" flood-color="#fe932c" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+
+  <!-- Outer Cloud Node Box -->
+  <rect x="2" y="2" width="28" height="28" rx="7" fill="url(#infravan-bg)" stroke="#fe932c" stroke-width="1.2" stroke-opacity="0.35"/>
+
+  <!-- Inner Signature Core -->
+  <rect x="9.5" y="9.5" width="13" height="13" rx="3" fill="url(#infravan-core)" filter="url(#core-glow)"/>
+</svg>

@@ -112,16 +112,17 @@ export function runMigrations(targetDb) {
   if (existing.length === 0) {
     defaultMerchant = merchantRepo.create({
       id: '00000000-0000-0000-0000-000000000001',
-      businessName: 'YOUPI Demo Store',
+      businessName: 'Infravan Store',
       slug: 'demo-store',
-      contactEmail: 'merchant@youpi.local',
+      contactEmail: 'merchant@infravan.tech',
       contactPhone: '9876543210',
       webhookUrl: process.env.COIN_STORE_WEBHOOK_URL || 'http://localhost:5000/api/webhook',
       webhookSecret: process.env.COIN_STORE_WEBHOOK_SECRET || 'merchant_webhook_secret_for_wallet_store',
       branding: {
-        appName: 'YOUPI PG',
-        primaryColor: '#2563eb',
-        logoUrl: null
+        appName: 'Infravan PG',
+        primaryColor: '#fe932c',
+        logoUrl: '/icons/infravan-icon.svg',
+        headerTheme: 'dark'
       }
     });
   } else {

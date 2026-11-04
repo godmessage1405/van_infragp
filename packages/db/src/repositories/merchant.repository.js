@@ -13,7 +13,7 @@ export class MerchantRepository {
    */
   create(data) {
     const id = data.id || crypto.randomUUID();
-    const branding = typeof data.branding === 'object' ? JSON.stringify(data.branding) : (data.branding || '{"primaryColor":"#2563eb","appName":"YOUPI PG","logoUrl":null}');
+    const branding = typeof data.branding === 'object' ? JSON.stringify(data.branding) : (data.branding || '{"primaryColor":"#fe932c","appName":"Infravan PG","logoUrl":"/icons/infravan-icon.svg","headerTheme":"dark"}');
     const now = new Date().toISOString();
 
     const sql = `

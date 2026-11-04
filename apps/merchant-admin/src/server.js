@@ -1,6 +1,7 @@
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
+import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { getDatabase, MerchantRepository, SupportTicketRepository } from '@youpi/db';
 
@@ -17,6 +18,125 @@ if (!process.env.BASE_PAYMENT_API_URL && typeof process.loadEnvFile === 'functio
   } catch {}
 }
 
+function getJwtSecret() {
+  return process.env.JWT_SECRET || process.env.ENCRYPTION_MASTER_KEY || 'youpi_pg_admin_secure_secret_key_change_me_in_prod_min_32_chars';
+}
+
+function parseCookies(cookieHeader) {
+  const cookies = {};
+  if (!cookieHeader) return cookies;
+  const pairs = cookieHeader.split(';');
+  for (const pair of pairs) {
+    const idx = pair.indexOf('=');
+    if (idx > 0) {
+      const key = pair.substring(0, idx).trim();
+      const val = pair.substring(idx + 1).trim();
+      cookies[key] = decodeURIComponent(val);
+    }
+  }
+  return cookies;
+}
+
+function createAdminToken(email, rememberMe = true) {
+  const durationMs = rememberMe ? 30 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000;
+  const payload = {
+    email,
+    role: 'admin',
+    iat: Date.now(),
+    exp: Date.now() + durationMs
+  };
+  const payloadB64 = Buffer.from(JSON.stringify(payload)).toString('base64url');
+  const sig = crypto.createHmac('sha256', getJwtSecret()).update(payloadB64).digest('hex');
+  return {
+    token: `${payloadB64}.${sig}`,
+    durationSeconds: Math.floor(durationMs / 1000),
+    payload
+  };
+}
+
+function verifyAdminToken(token) {
+  if (!token || typeof token !== 'string') return null;
+  const parts = token.split('.');
+  if (parts.length !== 2) return null;
+  const [payloadB64, sig] = parts;
+  const expectedSig = crypto.createHmac('sha256', getJwtSecret()).update(payloadB64).digest('hex');
+  if (sig.length !== expectedSig.length) return null;
+  if (!crypto.timingSafeEqual(Buffer.from(sig, 'hex'), Buffer.from(expectedSig, 'hex'))) {
+    return null;
+  }
+  try {
+    const payload = JSON.parse(Buffer.from(payloadB64, 'base64url').toString('utf8'));
+    if (payload.exp && Date.now() > payload.exp) {
+      return null; // Expired
+    }
+    return payload;
+  } catch {
+    return null;
+  }
+}
+
+function getSessionFromRequest(req) {
+  // 1. Authorization header: Bearer <token>
+  const authHeader = req.headers['authorization'];
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    const token = authHeader.substring(7).trim();
+    const verified = verifyAdminToken(token);
+    if (verified) return verified;
+  }
+  // 2. Cookie header: youpi_admin_session=<token>
+  const cookies = parseCookies(req.headers['cookie']);
+  if (cookies.youpi_admin_session) {
+    const verified = verifyAdminToken(cookies.youpi_admin_session);
+    if (verified) return verified;
+  }
+  return null;
+}
+
+// In-memory brute force protection
+const loginAttempts = new Map();
+function checkRateLimit(ip) {
+  const now = Date.now();
+  const record = loginAttempts.get(ip);
+  if (!record) return { allowed: true };
+  if (record.lockedUntil && now < record.lockedUntil) {
+    const remainingSec = Math.ceil((record.lockedUntil - now) / 1000);
+    return { allowed: false, remainingSec };
+  }
+  if (record.lockedUntil && now >= record.lockedUntil) {
+    loginAttempts.delete(ip);
+    return { allowed: true };
+  }
+  return { allowed: true };
+}
+
+function recordFailedAttempt(ip) {
+  const now = Date.now();
+  const record = loginAttempts.get(ip) || { count: 0, lockedUntil: 0 };
+  record.count += 1;
+  if (record.count >= 5) {
+    record.lockedUntil = now + 15 * 60 * 1000; // 15 min lockout
+  }
+  loginAttempts.set(ip, record);
+}
+
+function clearRateLimit(ip) {
+  loginAttempts.delete(ip);
+}
+
+function verifyCredentials(inputEmail, inputPassword) {
+  const envEmail = (process.env.ADMIN_EMAIL || process.env.INITIAL_ADMIN_EMAIL || 'admin@youpi.local').toLowerCase().trim();
+  const envPass = process.env.ADMIN_PASSWORD || process.env.INITIAL_ADMIN_PASSWORD || 'AdminSecurePassword123!';
+
+  const cleanInputEmail = (inputEmail || '').toLowerCase().trim();
+  const cleanInputPass = inputPassword || '';
+
+  // Double SHA-256 hash for constant-length timing-safe comparison
+  const hashA = crypto.createHash('sha256').update(`${cleanInputEmail}:${cleanInputPass}`).digest();
+  const hashB = crypto.createHash('sha256').update(`${envEmail}:${envPass}`).digest();
+
+  return crypto.timingSafeEqual(hashA, hashB);
+}
+
 export class AdminServer {
   /**
    * @param {{
@@ -30,6 +150,7 @@ export class AdminServer {
     this.merchantRepo = new MerchantRepository(this.db);
     this.ticketRepo = new SupportTicketRepository(this.db);
     this.htmlTemplatePath = path.join(__dirname, 'views', 'admin.html');
+    this.loginTemplatePath = path.join(__dirname, 'views', 'login.html');
     this.template = fs.readFileSync(this.htmlTemplatePath, 'utf8');
   }
 
@@ -47,6 +168,14 @@ export class AdminServer {
     return html;
   }
 
+  renderLoginHtml() {
+    try {
+      return fs.readFileSync(this.loginTemplatePath, 'utf8');
+    } catch {
+      return '<h1>Admin Login</h1>';
+    }
+  }
+
   createServer() {
     return http.createServer(async (req, res) => {
       const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
@@ -62,11 +191,163 @@ export class AdminServer {
         return;
       }
 
-      // Health
+      // Health Check (Always Public)
       if (pathname === '/health') {
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ status: 'UP', service: 'merchant-admin' }));
         return;
+      }
+
+      // Public Login API: POST /api/admin/login
+      if (pathname === '/api/admin/login' && req.method === 'POST') {
+        const ip = req.headers['x-forwarded-for']?.split(',')[0].trim() || req.socket.remoteAddress || '127.0.0.1';
+        const rateCheck = checkRateLimit(ip);
+        if (!rateCheck.allowed) {
+          res.writeHead(429, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ 
+            error: 'TOO_MANY_REQUESTS', 
+            message: `Too many failed login attempts. Please try again after ${rateCheck.remainingSec} seconds.` 
+          }));
+          return;
+        }
+
+        let body = '';
+        req.on('data', chunk => { body += chunk; });
+        req.on('end', () => {
+          try {
+            const { email, password, rememberMe } = JSON.parse(body || '{}');
+            if (!email || !password) {
+              res.writeHead(400, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify({ error: 'BAD_REQUEST', message: 'Email and password are required' }));
+              return;
+            }
+
+            const isValid = verifyCredentials(email, password);
+            if (!isValid) {
+              recordFailedAttempt(ip);
+              res.writeHead(401, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify({ error: 'INVALID_CREDENTIALS', message: 'Invalid admin email or password' }));
+              return;
+            }
+
+            clearRateLimit(ip);
+            const { token, durationSeconds } = createAdminToken(email, rememberMe !== false);
+            const isSecure = (req.headers['x-forwarded-proto'] === 'https') || req.socket.encrypted;
+            const cookieParts = [
+              `youpi_admin_session=${token}`,
+              'Path=/',
+              'HttpOnly',
+              'SameSite=Lax',
+              `Max-Age=${durationSeconds}`
+            ];
+            if (isSecure) {
+              cookieParts.push('Secure');
+            }
+
+            res.writeHead(200, {
+              'Content-Type': 'application/json',
+              'Set-Cookie': cookieParts.join('; ')
+            });
+            res.end(JSON.stringify({ success: true, email, token }));
+          } catch (err) {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'INVALID_JSON', message: err.message }));
+          }
+        });
+        return;
+      }
+
+      // Public Logout API: POST /api/admin/logout or GET /logout
+      if ((pathname === '/api/admin/logout' && req.method === 'POST') || (pathname === '/logout' && req.method === 'GET')) {
+        const isSecure = (req.headers['x-forwarded-proto'] === 'https') || req.socket.encrypted;
+        const cookieParts = [
+          'youpi_admin_session=',
+          'Path=/',
+          'HttpOnly',
+          'SameSite=Lax',
+          'Max-Age=0'
+        ];
+        if (isSecure) {
+          cookieParts.push('Secure');
+        }
+
+        if (pathname === '/logout') {
+          res.writeHead(302, {
+            'Location': '/login',
+            'Set-Cookie': cookieParts.join('; ')
+          });
+          res.end();
+          return;
+        }
+
+        res.writeHead(200, {
+          'Content-Type': 'application/json',
+          'Set-Cookie': cookieParts.join('; ')
+        });
+        res.end(JSON.stringify({ success: true, message: 'Logged out successfully' }));
+        return;
+      }
+
+      // Login Page: GET /login
+      if (pathname === '/login') {
+        const session = getSessionFromRequest(req);
+        if (session) {
+          res.writeHead(302, { 'Location': '/admin' });
+          res.end();
+          return;
+        }
+
+        const html = this.renderLoginHtml();
+        res.writeHead(200, {
+          'Content-Type': 'text/html; charset=utf-8',
+          'Cache-Control': 'no-cache'
+        });
+        res.end(html);
+        return;
+      }
+
+      // Download Android Companion APK (Public)
+      if (pathname === '/youpi-sms-gateway.apk' || pathname === '/api/v1/admin/sms-gateway/download-apk') {
+        const apkCandidates = [
+          path.resolve(__dirname, '../public/youpi-sms-gateway.apk'),
+          path.resolve(__dirname, '../../payment-api/public/youpi-sms-gateway.apk'),
+          path.resolve(__dirname, '../../android-observer-app/youpi-sms-gateway.apk')
+        ];
+        let apkPath = null;
+        for (const p of apkCandidates) {
+          if (fs.existsSync(p)) {
+            apkPath = p;
+            break;
+          }
+        }
+        if (apkPath) {
+          const stat = fs.statSync(apkPath);
+          res.writeHead(200, {
+            'Content-Type': 'application/vnd.android.package-archive',
+            'Content-Disposition': 'attachment; filename="youpi-sms-gateway.apk"',
+            'Content-Length': stat.size,
+            'Access-Control-Allow-Origin': '*'
+          });
+          const stream = fs.createReadStream(apkPath);
+          stream.pipe(res);
+          return;
+        }
+      }
+
+      // Require authentication for all Admin APIs
+      if (pathname.startsWith('/api/')) {
+        const session = getSessionFromRequest(req);
+        if (!session) {
+          res.writeHead(401, {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*'
+          });
+          res.end(JSON.stringify({
+            error: 'UNAUTHORIZED',
+            message: 'Admin authentication required. Please sign in.'
+          }));
+          return;
+        }
       }
 
       // Admin Tickets API: GET /api/admin/tickets
@@ -145,36 +426,15 @@ export class AdminServer {
         return;
       }
 
-      // Download Android Companion APK
-      if (pathname === '/youpi-sms-gateway.apk' || pathname === '/api/v1/admin/sms-gateway/download-apk') {
-        const apkCandidates = [
-          path.resolve(__dirname, '../public/youpi-sms-gateway.apk'),
-          path.resolve(__dirname, '../../payment-api/public/youpi-sms-gateway.apk'),
-          path.resolve(__dirname, '../../android-observer-app/youpi-sms-gateway.apk')
-        ];
-        let apkPath = null;
-        for (const p of apkCandidates) {
-          if (fs.existsSync(p)) {
-            apkPath = p;
-            break;
-          }
-        }
-        if (apkPath) {
-          const stat = fs.statSync(apkPath);
-          res.writeHead(200, {
-            'Content-Type': 'application/vnd.android.package-archive',
-            'Content-Disposition': 'attachment; filename="youpi-sms-gateway.apk"',
-            'Content-Length': stat.size,
-            'Access-Control-Allow-Origin': '*'
-          });
-          const stream = fs.createReadStream(apkPath);
-          stream.pipe(res);
+      // Dashboard View: GET / or GET /admin (Protected)
+      if (pathname === '/' || pathname === '/admin') {
+        const session = getSessionFromRequest(req);
+        if (!session) {
+          res.writeHead(302, { 'Location': '/login' });
+          res.end();
           return;
         }
-      }
 
-      // Dashboard View: GET / or GET /admin
-      if (pathname === '/' || pathname === '/admin') {
         const html = this.renderHtml();
         res.writeHead(200, {
           'Content-Type': 'text/html; charset=utf-8',
