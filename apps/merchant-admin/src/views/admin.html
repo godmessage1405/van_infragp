@@ -1367,74 +1367,45 @@
                   <div>
                     <label style="display:block; font-size:0.82rem; font-weight:700; margin-bottom:0.35rem;">Merchant
                       Store / Business Name</label>
-                    <input id="settingBusinessName" type="text" placeholder="e.g. Infravan Store"
-                      style="width:100%;" oninput="updateLiveWhiteLabelPreview()" />
+                    <input id="settingBusinessName" type="text" placeholder="e.g. Infravan Store" style="width:100%;" oninput="updateLiveWhiteLabelPreview()" />
+
                   </div>
                   <div>
                     <label style="display:block; font-size:0.82rem; font-weight:700; margin-bottom:0.35rem;">Gateway
-                      Title / App Name</label>
-                    <input id="settingAppName" type="text" value="Infravan PG" placeholder="e.g. Infravan Pay"
-                      style="width:100%;" oninput="updateLiveWhiteLabelPreview()" />
+                      Title / App Name <span style="color:#f59e0b; font-size:0.75rem; font-weight:600;">🔒 System Locked</span></label>
+                    <input id="settingAppName" type="text" value="Infravan PG" readonly disabled style="width:100%; background:rgba(255,255,255,0.05); color:var(--text-muted); cursor:not-allowed;" title="Gateway Title is permanently set to Infravan PG" />
+
                   </div>
                 </div>
                 <div>
                   <label style="display:block; font-size:0.82rem; font-weight:700; margin-bottom:0.35rem;">Brand Logo
-                    Image URL</label>
-                  <input id="settingLogoUrl" type="url" placeholder="https://yourbrand.com/logo.png" style="width:100%;"
-                    oninput="updateLiveWhiteLabelPreview()" />
+                    Image URL <span style="color:#f59e0b; font-size:0.75rem; font-weight:600;">🔒 System Locked</span></label>
+                  <input id="settingLogoUrl" type="text" value="Official Infravan PG Sovereign Logo" readonly disabled style="width:100%; background:rgba(255,255,255,0.05); color:var(--text-muted); cursor:not-allowed;" title="Brand logo is permanently managed by Infravan Technologies" />
+
                   <span
-                    style="font-size:0.72rem; color:var(--text-muted); display:block; margin-top:0.25rem;">Transparent
-                    PNG or SVG recommended. When left blank, your store initial letter is used.</span>
+                    style="font-size:0.72rem; color:var(--text-muted); display:block; margin-top:0.25rem;">🔒 Sovereign brand logo managed authoritatively by Infravan Technologies.</span>
+
                 </div>
               </div>
 
               <!-- SECTION 2: VISUAL THEME & COLOR PALETTE -->
               <div class="settings-group-box">
-                <div class="group-box-title">
-                  🎨 2. Visual Theme &amp; Color Palette
+                <div class="group-box-title" style="display:flex; justify-content:space-between; align-items:center;">
+                  <span>🎨 2. Visual Theme &amp; Color Palette</span>
+                  <span style="color:#f59e0b; font-size:0.75rem; font-weight:600;">🔒 System Locked</span>
                 </div>
-                <div style="display:grid; grid-template-columns:1.2fr 1fr; gap:1rem; margin-bottom:1rem;">
-                  <div>
-                    <label style="display:block; font-size:0.82rem; font-weight:700; margin-bottom:0.35rem;">Primary
-                      Brand Color (Hex)</label>
-                    <div style="display:flex; gap:0.5rem; align-items:center;">
-                      <input id="settingColorPicker" type="color" value="#0b63e5"
-                        style="width:44px; height:40px; border:none; background:transparent; cursor:pointer; padding:0;"
-                        oninput="syncColorPickerToText(this.value)" />
-                      <input id="settingPrimaryColor" type="text" value="#0b63e5"
-                        style="flex:1; font-family:monospace; font-weight:700;"
-                        oninput="syncTextColorToPicker(this.value)" />
+                <div style="padding:0.85rem; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.08); border-radius:8px;">
+                  <div style="display:flex; align-items:center; gap:0.85rem;">
+                    <div style="width:28px; height:28px; border-radius:7px; background:linear-gradient(135deg, #0b63e5 0%, #1e40af 100%); border:2px solid rgba(255,255,255,0.2); box-shadow:0 0 10px rgba(11,99,229,0.3);"></div>
+                    <div>
+                      <div style="font-size:0.84rem; font-weight:700; color:var(--text-main);">Official Infravan Sapphire Theme (#0b63e5)</div>
+                      <div style="font-size:0.72rem; color:var(--text-muted); margin-top:0.15rem;">Standardized high-security theme for customer trust, anti-phishing verification and RBI/NPCI UI consistency. Visual styling cannot be altered.</div>
                     </div>
                   </div>
-                  <div>
-                    <label style="display:block; font-size:0.82rem; font-weight:700; margin-bottom:0.35rem;">Header
-                      Styling Theme</label>
-                    <select id="settingHeaderTheme" style="width:100%;" onchange="updateLiveWhiteLabelPreview()">
-                      <option value="gradient">Dynamic Gradient (Brand to Deep Accent)</option>
-                      <option value="solid">Solid Brand Color</option>
-                      <option value="dark">Obsidian Dark Navy (#0b1329)</option>
-                    </select>
-                  </div>
                 </div>
-                <div>
-                  <span
-                    style="font-size:0.75rem; color:var(--text-muted); font-weight:700; display:block; margin-bottom:0.4rem;">Quick
-                    FinTech Brand Palettes:</span>
-                  <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
-                    <button type="button" class="btn btn-secondary" style="padding:0.3rem 0.65rem; font-size:0.75rem;"
-                      onclick="applyQuickPalette('#0b63e5', 'gradient')">🔵 Sapphire Blue</button>
-                    <button type="button" class="btn btn-secondary" style="padding:0.3rem 0.65rem; font-size:0.75rem;"
-                      onclick="applyQuickPalette('#10b981', 'gradient')">🟢 Emerald Green</button>
-                    <button type="button" class="btn btn-secondary" style="padding:0.3rem 0.65rem; font-size:0.75rem;"
-                      onclick="applyQuickPalette('#8b5cf6', 'gradient')">🟣 Violet Purple</button>
-                    <button type="button" class="btn btn-secondary" style="padding:0.3rem 0.65rem; font-size:0.75rem;"
-                      onclick="applyQuickPalette('#f43f5e', 'gradient')">🔴 Rose Crimson</button>
-                    <button type="button" class="btn btn-secondary" style="padding:0.3rem 0.65rem; font-size:0.75rem;"
-                      onclick="applyQuickPalette('#d97706', 'gradient')">🟡 Amber Gold</button>
-                    <button type="button" class="btn btn-secondary" style="padding:0.3rem 0.65rem; font-size:0.75rem;"
-                      onclick="applyQuickPalette('#0f172a', 'dark')">⚫ Obsidian Dark</button>
-                  </div>
-                </div>
+                <input id="settingPrimaryColor" type="hidden" value="#0b63e5" />
+                <input id="settingColorPicker" type="hidden" value="#0b63e5" />
+                <input id="settingHeaderTheme" type="hidden" value="gradient" />
               </div>
 
               <!-- SECTION 3: TRUST BADGE & SUB-BANNER CONTROLS -->
@@ -4215,10 +4186,11 @@
 
     function updateLiveWhiteLabelPreview() {
       const bName = document.getElementById('settingBusinessName')?.value.trim() || 'Merchant Checkout';
-      const appName = document.getElementById('settingAppName')?.value.trim() || 'YOUPI PG';
-      const logoUrl = document.getElementById('settingLogoUrl')?.value.trim() || '';
-      const primaryColor = document.getElementById('settingPrimaryColor')?.value.trim() || '#0b63e5';
-      const headerTheme = document.getElementById('settingHeaderTheme')?.value || 'gradient';
+      const appName = 'Infravan PG';
+      const logoUrl = '';
+      const primaryColor = '#0b63e5';
+      const headerTheme = 'gradient';
+
       const trustBadgeText = document.getElementById('settingTrustBadgeText')?.value.trim();
       const hideTrustBadge = document.getElementById('settingHideTrustBadge')?.checked;
       const subbannerText = document.getElementById('settingSubbannerText')?.value.trim();
@@ -4321,8 +4293,8 @@
           setVal('settingWebhookUrl', mData.webhookUrl);
           setVal('settingWebhookSecret', mData.webhookSecret);
 
-          setVal('settingAppName', branding.appName || 'YOUPI PG');
-          setVal('settingLogoUrl', branding.logoUrl);
+          setVal('settingAppName', 'Infravan PG');
+          setVal('settingLogoUrl', 'Official Infravan PG Sovereign Logo');
           setVal('settingSidebarNotice', branding.sidebarNotice);
           setVal('settingFooterGuarantee', branding.footerGuarantee);
           setVal('settingCounterInstructions', branding.counterInstructions);
@@ -4499,9 +4471,10 @@
     async function saveMerchantBrandingAndToggles() {
       settingsLoaded = true;
       const businessName = document.getElementById('settingBusinessName')?.value.trim() || '';
-      const appName = document.getElementById('settingAppName')?.value.trim() || 'YOUPI PG';
-      const logoUrl = document.getElementById('settingLogoUrl')?.value.trim() || '';
-      const primaryColor = document.getElementById('settingPrimaryColor')?.value.trim() || '#0b63e5';
+      const appName = 'Infravan PG';
+      const logoUrl = '';
+      const primaryColor = '#0b63e5';
+      const headerTheme = 'gradient';
       const sidebarNotice = document.getElementById('settingSidebarNotice')?.value.trim() || (currentMerchantBranding?.sidebarNotice || '');
       const footerGuarantee = document.getElementById('settingFooterGuarantee')?.value.trim() || (currentMerchantBranding?.footerGuarantee || '');
       const counterInstructions = document.getElementById('settingCounterInstructions')?.value.trim() || '';
@@ -4511,7 +4484,7 @@
       const supportMobiles = (document.getElementById('settingSupportMobiles')?.value || '').split(/[,\n]+/).map(s => s.trim()).filter(Boolean);
       const privacyPolicyUrl = document.getElementById('settingPrivacyPolicyUrl')?.value.trim() || '';
 
-      const headerTheme = document.getElementById('settingHeaderTheme')?.value || 'gradient';
+
       const trustBadgeText = (document.getElementById('settingTrustBadgeText')?.value || '').trim() || (currentMerchantBranding?.trustBadgeText || '');
       const hideTrustBadge = document.getElementById('settingHideTrustBadge')?.type === 'checkbox'
         ? (document.getElementById('settingHideTrustBadge')?.checked || false)
