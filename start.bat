@@ -41,7 +41,7 @@ if not exist "data\" (
 :: 4. Stop any old conflicting node instances on these ports
 echo [*] Clearing stale processes from ports...
 taskkill /F /IM node.exe >nul 2>nul
-timeout /t 1 /nobreak >nul
+ping 127.0.0.1 -n 2 >nul
 
 :: 5. Setup & Launch Caddy Reverse Proxy for pg.infravan.tech
 if not exist "Caddyfile" (
@@ -52,22 +52,19 @@ if not exist "Caddyfile" (
 )
 
 if not exist "caddy.exe" (
-    where caddy >nul 2>nul
-    if %ERRORLEVEL% NEQ 0 (
-        echo [*] Caddy reverse proxy not detected. Downloading caddy.exe for SSL...
-        powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri 'https://caddyserver.com/api/download?os=windows&arch=amd64' -OutFile 'caddy.exe'"
-    )
+    echo [*] Downloading caddy.exe for automatic SSL and domain proxy...
+    powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; (New-Object Net.WebClient).DownloadFile('https://caddyserver.com/api/download?os=windows&arch=amd64', 'caddy.exe')"
 )
 
 :: Check if Caddy is already running
 tasklist /FI "IMAGENAME eq caddy.exe" 2>nul | find /I /N "caddy.exe" >nul
-if %ERRORLEVEL% NEQ 0 (
+if errorlevel 1 (
     if exist "caddy.exe" (
         echo [*] Starting Caddy SSL Reverse Proxy in background...
         start "" caddy.exe run
     )
 ) else (
-    echo [*] Caddy SSL Reverse Proxy is active and routing domains.
+    echo [*] Caddy SSL Reverse Proxy is already active and routing domains.
 )
 
 :: 6. Launch Infravan PG Gateway Services
@@ -80,10 +77,10 @@ echo   - Public Payment API: https://pg-api.infravan.tech
 echo   - Public Gmail Obs:   https://pg-gmail.infravan.tech
 echo   ----------------------------------------------------------
 echo   Internal Backend Ports:
-echo   - Port 7000 (Checkout)  <- routed from pg.infravan.tech
-echo   - Port 6001 (Admin)     <- routed from pg-admin.infravan.tech
-echo   - Port 6100 (API)       <- routed from pg-api.infravan.tech
-echo   - Port 6003 (Gmail)     <- routed from pg-gmail.infravan.tech
+echo   - Port 7000 (Checkout)  : routed from pg.infravan.tech
+echo   - Port 6001 (Admin)     : routed from pg-admin.infravan.tech
+echo   - Port 6100 (API)       : routed from pg-api.infravan.tech
+echo   - Port 6003 (Gmail)     : routed from pg-gmail.infravan.tech
 echo   - Port 6002 (SMS)
 echo   - Port 8090 (Control)
 echo ============================================================
