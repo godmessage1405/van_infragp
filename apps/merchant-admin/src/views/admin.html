@@ -1899,6 +1899,57 @@
           </div>
         </div>
 
+        <!-- QUICK PAY TEST: Instantly create a checkout session for end-to-end testing -->
+        <div class="card" id="quickPayTestCard" style="border:2px solid #10b981; background:linear-gradient(135deg, rgba(16,185,129,0.09) 0%, rgba(15,23,42,0.98) 100%); margin-bottom:1.5rem;">
+          <div style="display:flex; align-items:center; gap:0.6rem; margin-bottom:1rem;">
+            <span style="font-size:1.4rem;">⚡</span>
+            <strong style="color:#ffffff; font-size:1.1rem;">Quick Pay Test — Create Live Checkout Session</strong>
+            <span class="badge" style="background:#059669; color:#fff; font-size:0.72rem; padding:0.2rem 0.6rem;">END-TO-END TEST</span>
+          </div>
+          <p style="font-size:0.84rem; color:#94a3b8; margin:0 0 1rem 0; line-height:1.5;">
+            Custom amount takun liveṃ checkout session banva. Payment UPI app ne karo — Gmail/SMS observer automatically verify karato.
+            Checkout link new tab madhye ughadate.
+          </p>
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:1rem; align-items:end;">
+            <div>
+              <label style="display:block; color:#94a3b8; font-size:0.78rem; margin-bottom:0.4rem; font-weight:600;">Order ID</label>
+              <input type="text" id="quickPayOrderId" placeholder="e.g. TEST-001"
+                style="width:100%; box-sizing:border-box; background:#1e293b; color:#f8fafc; border:1px solid #475569; padding:0.55rem 0.75rem; border-radius:6px; font-size:0.88rem;" />
+            </div>
+            <div>
+              <label style="display:block; color:#94a3b8; font-size:0.78rem; margin-bottom:0.4rem; font-weight:600;">Amount (₹)</label>
+              <input type="number" id="quickPayAmount" placeholder="e.g. 100" min="1"
+                style="width:100%; box-sizing:border-box; background:#1e293b; color:#f8fafc; border:1px solid #475569; padding:0.55rem 0.75rem; border-radius:6px; font-size:0.88rem;" />
+            </div>
+            <div>
+              <label style="display:block; color:#94a3b8; font-size:0.78rem; margin-bottom:0.4rem; font-weight:600;">Customer Name</label>
+              <input type="text" id="quickPayName" placeholder="e.g. Test Customer" value="Test Customer"
+                style="width:100%; box-sizing:border-box; background:#1e293b; color:#f8fafc; border:1px solid #475569; padding:0.55rem 0.75rem; border-radius:6px; font-size:0.88rem;" />
+            </div>
+            <div>
+              <button class="btn btn-primary" onclick="quickPayCreateSession()"
+                id="btnQuickPay"
+                style="width:100%; background:#10b981; border-color:#059669; color:#fff; font-weight:700; font-size:0.92rem; padding:0.6rem 1rem;">
+                ⚡ Create Checkout & Open
+              </button>
+            </div>
+          </div>
+          <div id="quickPayResult" style="display:none; margin-top:1rem; padding:0.85rem 1rem; border-radius:8px; background:#0f172a; border:1px solid #334155;">
+            <div style="font-size:0.76rem; color:#94a3b8; margin-bottom:0.4rem;">Checkout Session Created:</div>
+            <div style="display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">
+              <code id="quickPayUrl" style="color:#38bdf8; font-size:0.82rem; word-break:break-all; flex:1;"></code>
+              <a id="quickPayLink" href="#" target="_blank" class="btn btn-primary" style="font-size:0.8rem; padding:0.4rem 0.9rem; white-space:nowrap;">
+                🔗 Open Checkout
+              </a>
+              <button onclick="navigator.clipboard.writeText(document.getElementById('quickPayUrl').textContent).then(() => showAdminToast('URL copied!'))"
+                class="btn btn-secondary" style="font-size:0.8rem; padding:0.4rem 0.75rem;">📋 Copy</button>
+            </div>
+            <div style="margin-top:0.5rem; font-size:0.76rem; color:#64748b;">
+              Payment ID: <code id="quickPayPaymentId" style="color:#fbbf24;"></code>
+            </div>
+          </div>
+        </div>
+
         <!-- Target Customer & Active Payment Session Card -->
         <div class="card" style="border:1px solid #334155; background:#0f172a; margin-bottom:1.5rem;">
           <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:1.5rem;">
@@ -6105,6 +6156,62 @@
       await simCheckTestMode();
       await simFetchCustomers();
       await simFetchHistory();
+      // Auto-generate a unique order ID for quick pay
+      const orderInput = document.getElementById('quickPayOrderId');
+      if (orderInput && !orderInput.value) {
+        orderInput.value = 'TEST-' + Date.now().toString().slice(-6);
+      }
+    }
+
+    async function quickPayCreateSession() {
+      const orderId = document.getElementById('quickPayOrderId')?.value?.trim();
+      const amount = parseFloat(document.getElementById('quickPayAmount')?.value || '0');
+      const name = document.getElementById('quickPayName')?.value?.trim() || 'Test Customer';
+
+      if (!orderId) { showAdminToast('Order ID is required', 'error'); return; }
+      if (!amount || amount <= 0) { showAdminToast('Enter a valid amount', 'error'); return; }
+
+      const btn = document.getElementById('btnQuickPay');
+      if (btn) { btn.disabled = true; btn.textContent = '⏳ Creating...'; }
+
+      try {
+        const mId = await simGetMerchantId();
+        const res = await fetch(`${API_BASE}/api/v1/payments`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-merchant-id': mId },
+          body: JSON.stringify({
+            orderId,
+            amount,
+            currency: 'INR',
+            customer: { name }
+          })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          showAdminToast('Error: ' + (data.error || 'Failed to create session'), 'error');
+          return;
+        }
+        const url = data.checkoutUrl;
+        const resultDiv = document.getElementById('quickPayResult');
+        const urlEl = document.getElementById('quickPayUrl');
+        const linkEl = document.getElementById('quickPayLink');
+        const pidEl = document.getElementById('quickPayPaymentId');
+        if (resultDiv) resultDiv.style.display = 'block';
+        if (urlEl) urlEl.textContent = url;
+        if (linkEl) { linkEl.href = url; }
+        if (pidEl) pidEl.textContent = data.paymentId;
+        showAdminToast('Checkout session created! Opening...');
+        window.open(url, '_blank');
+        // Refresh simulator sessions
+        await simFetchCustomers();
+        // Auto-generate new order ID for next test
+        const orderInput = document.getElementById('quickPayOrderId');
+        if (orderInput) orderInput.value = 'TEST-' + Date.now().toString().slice(-6);
+      } catch (e) {
+        showAdminToast('Network error: ' + e.message, 'error');
+      } finally {
+        if (btn) { btn.disabled = false; btn.innerHTML = '⚡ Create Checkout & Open'; }
+      }
     }
 
     async function simCheckTestMode() {
