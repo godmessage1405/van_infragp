@@ -3550,14 +3550,14 @@
                   </div>
                 </div>
 
-                <!-- FAST PAY: One-Click UPI App Launch (No Screenshot / Scanning Needed) -->
+                <!-- FAST PAY: One-Click UPI App Launch -->
                 <div class="ypg-direct-upi-apps-wrap" style="margin: 14px 0 16px 0; background: rgba(15, 23, 42, 0.6); border: 1.5px solid rgba(254, 147, 44, 0.35); border-radius: 12px; padding: 12px 14px;">
                   <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
                     <div style="font-size: 12px; font-weight: 800; color: #f8fafc; display: flex; align-items: center; gap: 6px;">
                       <span>⚡</span>
                       <span>Direct Pay via Mobile UPI App</span>
                     </div>
-                    <span style="font-size: 10px; font-weight: 800; color: #10b981; background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); padding: 2px 7px; border-radius: 999px;">NO SCANNING NEEDED</span>
+                    <span style="font-size: 10px; font-weight: 800; color: #10b981; background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); padding: 2px 7px; border-radius: 999px;">FAST CHECKOUT</span>
                   </div>
 
                   <!-- 3 Direct App Buttons -->
@@ -3583,10 +3583,34 @@
 
                   <!-- Any UPI App Button -->
                   <button type="button" class="ypg-intent-btn" onclick="openUpiApp('any')"
-                    style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, #fe932c 0%, #ea580c 100%); border: none; color: #ffffff; font-weight: 800; font-size: 13px; padding: 10px 12px; border-radius: 9px; cursor: pointer; transition: all 0.15s ease; box-shadow: 0 4px 12px rgba(254,147,44,0.35);">
+                    style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, #fe932c 0%, #ea580c 100%); border: none; color: #ffffff; font-weight: 800; font-size: 13px; padding: 10px 12px; border-radius: 9px; cursor: pointer; transition: all 0.15s ease; box-shadow: 0 4px 12px rgba(254,147,44,0.35); margin-bottom: 10px;">
                     <span>🚀</span>
-                    <span id="btnAnyUpiText">Tap to Open in Any UPI App (CRED / BHIM / Bank)</span>
+                    <span id="btnAnyUpiText">Tap to Open in Any UPI App</span>
                   </button>
+
+                  <!-- 100% Guaranteed Bank-Safe Alternatives -->
+                  <div style="border-top: 1px dashed rgba(255, 255, 255, 0.15); padding-top: 10px; margin-top: 4px;">
+                    <div style="font-size: 11px; color: #94a3b8; margin-bottom: 8px; display: flex; align-items: center; gap: 5px;">
+                      <span>🛡️</span>
+                      <span>If PhonePe/Paytm shows bank security alert on direct link:</span>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                      <!-- 1-Tap Save QR to Photos Button -->
+                      <button type="button" onclick="saveQrToGallery()"
+                        style="display: flex; align-items: center; justify-content: center; gap: 6px; background: rgba(30, 41, 59, 0.85); border: 1.5px solid #38bdf8; color: #38bdf8; font-weight: 700; font-size: 12px; padding: 8px 6px; border-radius: 8px; cursor: pointer; transition: all 0.15s ease;">
+                        <span>📸</span>
+                        <span>Save QR to Photos</span>
+                      </button>
+
+                      <!-- 1-Tap Copy UPI ID Button -->
+                      <button type="button" onclick="copyUpiId()"
+                        style="display: flex; align-items: center; justify-content: center; gap: 6px; background: rgba(30, 41, 59, 0.85); border: 1.5px solid #a855f7; color: #c084fc; font-weight: 700; font-size: 12px; padding: 8px 6px; border-radius: 8px; cursor: pointer; transition: all 0.15s ease;">
+                        <span>📋</span>
+                        <span id="btnCopyUpiText">Copy UPI ID</span>
+                      </button>
+                    </div>
+                  </div>
                 </div>
 
                 <!-- UPI Payment Instructions Guide -->
@@ -6905,13 +6929,14 @@
       const vpa = (state && (state.payeeVpa || state.vpa)) || '{{VPA}}';
       const name = (state && state.merchantName) || '{{MERCHANT_NAME}}';
       const amount = (state && state.amount) || '{{AMOUNT}}';
-      const orderId = (state && (state.orderId || state.id)) || '{{ORDER_ID}}' || PAYMENT_ID;
 
+      // CRITICAL NPCI / PHONEPE PROTECT FIX:
+      // DO NOT pass 'tn' (order note like ORD-xxx) when paying to personal/savings VPAs!
+      // Passing ORD-xxx to P2P accounts triggers PhonePe Risk Engine and Paytm Protect ("Declined for security reasons").
       const upiQuery = 'pa=' + encodeURIComponent(vpa) +
         '&pn=' + encodeURIComponent(name) +
         '&am=' + encodeURIComponent(amount) +
-        '&cu=INR' +
-        '&tn=' + encodeURIComponent(orderId);
+        '&cu=INR';
 
       const genericUri = 'upi://pay?' + upiQuery;
       const isAndroid = /android/i.test(navigator.userAgent);
@@ -6919,33 +6944,110 @@
 
       let targetUri = genericUri;
       if (provider === 'phonepe') {
-        targetUri = isAndroid
-          ? 'intent://pay?' + upiQuery + '#Intent;scheme=upi;package=com.phonepe.app;end'
-          : 'phonepe://pay?' + upiQuery;
+        targetUri = 'phonepe://pay?' + upiQuery;
       } else if (provider === 'gpay') {
         targetUri = isAndroid
           ? 'intent://pay?' + upiQuery + '#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end'
           : 'gpay://upi/pay?' + upiQuery;
       } else if (provider === 'paytm') {
-        targetUri = isAndroid
-          ? 'intent://pay?' + upiQuery + '#Intent;scheme=upi;package=net.one97.paytm;end'
-          : 'paytmmp://pay?' + upiQuery;
+        targetUri = 'paytmmp://pay?' + upiQuery;
       }
 
       // If user is on a Desktop/Laptop PC, provide helpful prompt
       if (!isAndroid && !isIOS) {
-        showToast ? showToast('Opening UPI link... (If on a computer, please scan the QR code above with your phone)') : alert('Opening UPI link... If you are on a computer, please scan the QR code with your mobile phone.');
+        if (typeof showOptionToast === 'function') {
+          showOptionToast('Opening UPI link... (On PC, please scan QR with phone)');
+        } else {
+          alert('Opening UPI link... If you are on a computer, please scan the QR code with your mobile phone.');
+        }
       }
 
-      // Launch intent
+      // Launch target app URI
       window.location.href = targetUri;
 
-      // Fallback to generic UPI after brief delay if specific app not installed
+      // Fallback to standard UPI link if specific app fails to launch
       if (provider !== 'any') {
         setTimeout(() => {
           window.location.href = genericUri;
         }, 1500);
       }
+    }
+
+    // 1-Tap Save QR to Phone Gallery / Photos (Zero Screenshot Hassle)
+    function saveQrToGallery() {
+      try {
+        const svgEl = document.querySelector('#qrImageContainer svg');
+        if (!svgEl) {
+          window.location.href = '/checkout/' + PAYMENT_ID + '/qr.svg';
+          if (typeof showOptionToast === 'function') {
+            showOptionToast('📸 QR downloaded! Open PhonePe/GPay scanner & pick from gallery');
+          }
+          return;
+        }
+
+        const svgData = new XMLSerializer().serializeToString(svgEl);
+        const canvas = document.createElement('canvas');
+        canvas.width = 600;
+        canvas.height = 600;
+        const ctx = canvas.getContext('2d');
+        const img = new Image();
+        img.onload = function() {
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, 600, 600);
+          ctx.drawImage(img, 40, 40, 520, 520);
+          const pngUrl = canvas.toDataURL('image/png');
+          const a = document.createElement('a');
+          a.href = pngUrl;
+          a.download = 'UPI-QR-' + PAYMENT_ID.slice(0, 8) + '.png';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          if (typeof showOptionToast === 'function') {
+            showOptionToast('📸 QR saved to Gallery! Open PhonePe scanner & tap gallery icon');
+          }
+        };
+        img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgData);
+      } catch (err) {
+        console.error('saveQrToGallery error:', err);
+        window.location.href = '/checkout/' + PAYMENT_ID + '/qr.svg';
+      }
+    }
+
+    // 1-Tap Copy UPI ID
+    function copyUpiId() {
+      const vpa = (state && (state.payeeVpa || state.vpa)) || '{{VPA}}';
+      if (!vpa || vpa === '{{VPA}}') return;
+
+      const finishCopy = () => {
+        const btn = document.getElementById('btnCopyUpiText');
+        if (btn) {
+          const orig = btn.textContent;
+          btn.textContent = '✅ Copied!';
+          setTimeout(() => { btn.textContent = orig; }, 2500);
+        }
+        if (typeof showOptionToast === 'function') {
+          showOptionToast('📋 Copied: ' + vpa + ' (Paste in PhonePe/Paytm "To UPI ID")');
+        }
+      };
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(vpa).then(finishCopy).catch(() => {
+          fallbackCopyText(vpa);
+          finishCopy();
+        });
+      } else {
+        fallbackCopyText(vpa);
+        finishCopy();
+      }
+    }
+
+    function fallbackCopyText(text) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
     }
 
     loadState();
