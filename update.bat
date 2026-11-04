@@ -41,7 +41,7 @@ if %ERRORLEVEL% EQU 0 (
     echo [*] PM2 not active. Restarting background Node process...
     taskkill /F /IM node.exe >nul 2>nul
     timeout /t 2 /nobreak >nul
-    start "" /B npm run start
+    start "" /B npm run dev
 )
 
 echo.
