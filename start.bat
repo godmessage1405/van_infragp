@@ -59,25 +59,33 @@ if not exist "caddy.exe" (
     )
 )
 
-if exist "caddy.exe" (
-    echo [*] Starting Caddy SSL Reverse Proxy for pg.infravan.tech...
-    start "" caddy.exe run
+:: Check if Caddy is already running
+tasklist /FI "IMAGENAME eq caddy.exe" 2>nul | find /I /N "caddy.exe" >nul
+if %ERRORLEVEL% NEQ 0 (
+    if exist "caddy.exe" (
+        echo [*] Starting Caddy SSL Reverse Proxy in background...
+        start "" caddy.exe run
+    )
+) else (
+    echo [*] Caddy SSL Reverse Proxy is active and routing domains.
 )
 
 :: 6. Launch Infravan PG Gateway Services
 echo.
 echo ============================================================
 echo   Starting all Infravan PG Gateway Services...
-echo   - Public Domain:      https://pg.infravan.tech
-echo   - Admin Portal:       https://pg.infravan.tech/login
-echo   - Internal Admin:     http://localhost:6001
-echo   - Internal Checkout:  http://localhost:7000
-echo   - Internal Core API:  http://localhost:6100
-echo   - Control Center:     http://localhost:8090
-echo ============================================================
-echo   - Control Center:     http://localhost:8090
-echo   - Gmail Observer:     http://localhost:6003
-echo   - SMS Observer:       http://localhost:6002
+echo   - Public Checkout:    https://pg.infravan.tech
+echo   - Public Admin Hub:   https://pg-admin.infravan.tech
+echo   - Public Payment API: https://pg-api.infravan.tech
+echo   - Public Gmail Obs:   https://pg-gmail.infravan.tech
+echo   ----------------------------------------------------------
+echo   Internal Backend Ports:
+echo   - Port 7000 (Checkout)  <- routed from pg.infravan.tech
+echo   - Port 6001 (Admin)     <- routed from pg-admin.infravan.tech
+echo   - Port 6100 (API)       <- routed from pg-api.infravan.tech
+echo   - Port 6003 (Gmail)     <- routed from pg-gmail.infravan.tech
+echo   - Port 6002 (SMS)
+echo   - Port 8090 (Control)
 echo ============================================================
 echo.
 

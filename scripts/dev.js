@@ -46,7 +46,11 @@ await cc.processManager.startAll();
 console.log('====================================================');
 console.log('🟢 ALL SERVICES ONLINE & OPERATIONAL');
 console.log('====================================================');
-console.log('• Public Gateway Domain:        https://pg.infravan.tech');
+console.log('• Public Checkout Portal:     https://pg.infravan.tech');
+console.log('• Public Admin Hub:           https://pg-admin.infravan.tech');
+console.log('• Public Payment Core API:    https://pg-api.infravan.tech');
+console.log('• Public Gmail Observer:      https://pg-gmail.infravan.tech');
+console.log('----------------------------------------------------');
 console.log('• Merchant Panel & Control Hub: http://localhost:6001');
 console.log('• Payment Core REST API:        http://localhost:6100');
 console.log('• Customer Checkout Portal:     http://localhost:7000/checkout/:id');
@@ -67,7 +71,7 @@ const shutdown = async () => {
       } else {
         tunnelProcess.kill('SIGTERM');
       }
-    } catch {}
+    } catch { }
   }
   await cc.close();
   console.log('All processes terminated cleanly.');

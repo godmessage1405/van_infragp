@@ -33,8 +33,8 @@ const merchant = migrationResult.defaultMerchant;
 const branding = merchant?.branding || {};
 
 // 2. Validate Production Configuration (Part B2 & Part I)
-const domain = (branding.cloudflareDomain || branding.domainTld || process.env.CLOUDFLARE_DOMAIN || '').trim().toLowerCase().replace(/^https?:\/\//, '').replace(/\/+$/, '');
-const prefix = (branding.deploymentPrefix || branding.domainPrefix || process.env.DEPLOYMENT_PREFIX || 'pay').trim().toLowerCase().replace(/[^a-z0-9-_]/g, '') || 'pay';
+const domain = (branding.cloudflareDomain || branding.domainTld || process.env.CLOUDFLARE_DOMAIN || process.env.DOMAIN || 'infravan.tech').trim().toLowerCase().replace(/^https?:\/\//, '').replace(/\/+$/, '');
+const prefix = (process.env.DEPLOYMENT_PREFIX || branding.deploymentPrefix || branding.domainPrefix || 'pg').trim().toLowerCase().replace(/[^a-z0-9-_]/g, '') || 'pg';
 
 if (!domain) {
   console.error('\n================================================================');
