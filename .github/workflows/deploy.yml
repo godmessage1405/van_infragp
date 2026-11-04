@@ -1,4 +1,4 @@
-name: Deploy YOUPI PG to Production VPS
+name: Auto Deploy to Windows VPS
 
 on:
   push:
@@ -7,34 +7,28 @@ on:
 
 jobs:
   deploy:
-    name: Auto Deploy to VPS
-    runs-on: ubuntu-latest
+    name: Deploy to Windows VPS
+    runs-on: [self-hosted, windows]
 
     steps:
-      - name: SSH and Deploy to VPS
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USERNAME }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          password: ${{ secrets.VPS_PASSWORD }}
-          port: ${{ secrets.VPS_PORT || 22 }}
-          script: |
-            echo "🚀 Starting Deployment on VPS..."
-            cd ${{ secrets.VPS_TARGET_DIR || '/root/YouPI-PG' }}
-            
-            echo "📥 Pulling latest changes from main branch..."
-            git pull origin main
-            
-            echo "📦 Installing any updated production dependencies..."
-            npm install --omit=dev
-            
-            echo "🔄 Restarting application services..."
-            if command -v pm2 &> /dev/null; then
-              pm2 restart all || pm2 start scripts/start.js --name youpi-pg
-            else
-              npm run start
-            fi
-            
-            echo "✅ Deployment finished successfully!"
+      - name: Pull Latest Changes and Restart Server
+        shell: powershell
+        run: |
+          Write-Host "🚀 Starting Auto Deployment on VPS..."
+          Set-Location "C:\infravan-pg"
 
+          Write-Host "📥 Pulling latest changes from GitHub main branch..."
+          git pull origin main
+
+          Write-Host "📦 Checking updated dependencies..."
+          npm install --omit=dev
+
+          Write-Host "🔄 Restarting application server..."
+          if (Get-Command pm2 -ErrorAction SilentlyContinue) {
+            pm2 restart all
+          } else {
+            Stop-Process -Name "node" -Force -ErrorAction SilentlyContinue
+            Start-Process -FilePath "cmd.exe" -ArgumentList "/c npm run start" -WindowStyle Hidden
+          }
+
+          Write-Host "✅ Auto Deployment finished! Server is live with latest changes."
