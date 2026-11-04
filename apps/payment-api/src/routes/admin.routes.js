@@ -1418,7 +1418,7 @@ export function registerAdminRoutes(server, ctx) {
     const branding = merchant?.branding || {};
     const gmailConfig = branding.gmailConfig || {};
 
-    const redirectUri = 'https://pay-gmail.gauravtesting.online/oauth/callback';
+    const redirectUri = 'https://pay-gmail.infravan.tech/oauth/callback';
     const hasToken = Boolean(gmailConfig.refreshToken && gmailConfig.refreshToken.trim());
 
     HttpServer.json(res, 200, {
@@ -1461,7 +1461,7 @@ export function registerAdminRoutes(server, ctx) {
       });
       return;
     }
-    const redirectUri = 'https://pay-gmail.gauravtesting.online/oauth/callback';
+    const redirectUri = 'https://pay-gmail.infravan.tech/oauth/callback';
     const scopes = encodeURIComponent('https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/userinfo.email');
     const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${encodeURIComponent(clientId)}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${scopes}&access_type=offline&prompt=consent&include_granted_scopes=true`;
 

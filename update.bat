@@ -1,9 +1,9 @@
 @echo off
-title YOUPI PG - 1-Click Production Auto Updater
+title INFRAVAN PG - 1-Click Production Auto Updater
 color 0A
 
 echo ============================================================
-echo         YOUPI PG / INFRAVAN - 1-CLICK PRODUCTION UPDATER
+echo         INFRAVAN PG - 1-CLICK PRODUCTION UPDATER
 echo ============================================================
 echo.
 
@@ -50,3 +50,4 @@ echo  SUCCESS! Application successfully updated and live!
 echo ============================================================
 echo.
 pause
+

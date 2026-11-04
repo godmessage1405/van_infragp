@@ -64,7 +64,7 @@ describe('Merchant Admin Integration Tests', () => {
     assert.equal(res.status, 200);
     const json = JSON.parse(res.text);
     assert.equal(json.status, 'UP');
-    assert.equal(json.service, 'merchant-admin');
+    assert.equal(json.service, 'infravan-merchant-admin');
   });
 
   test('Unauthenticated GET / redirects 302 to /login', async () => {

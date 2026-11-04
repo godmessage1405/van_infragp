@@ -19,7 +19,7 @@ if (!process.env.BASE_PAYMENT_API_URL && typeof process.loadEnvFile === 'functio
 }
 
 function getJwtSecret() {
-  return process.env.JWT_SECRET || process.env.ENCRYPTION_MASTER_KEY || 'youpi_pg_admin_secure_secret_key_change_me_in_prod_min_32_chars';
+  return process.env.JWT_SECRET || process.env.ENCRYPTION_MASTER_KEY || 'infravan_pg_admin_secure_secret_key_min_32_chars';
 }
 
 function parseCookies(cookieHeader) {
@@ -124,7 +124,7 @@ function clearRateLimit(ip) {
 }
 
 function verifyCredentials(inputEmail, inputPassword) {
-  const envEmail = (process.env.ADMIN_EMAIL || process.env.INITIAL_ADMIN_EMAIL || 'admin@youpi.local').toLowerCase().trim();
+  const envEmail = (process.env.ADMIN_EMAIL || process.env.INITIAL_ADMIN_EMAIL || 'admin@infravan.tech').toLowerCase().trim();
   const envPass = process.env.ADMIN_PASSWORD || process.env.INITIAL_ADMIN_PASSWORD || 'AdminSecurePassword123!';
 
   const cleanInputEmail = (inputEmail || '').toLowerCase().trim();
@@ -194,7 +194,7 @@ export class AdminServer {
       // Health Check (Always Public)
       if (pathname === '/health') {
         res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ status: 'UP', service: 'merchant-admin' }));
+        res.end(JSON.stringify({ status: 'UP', service: 'infravan-merchant-admin' }));
         return;
       }
 
