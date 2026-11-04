@@ -3549,6 +3549,46 @@
                     </div>
                   </div>
                 </div>
+
+                <!-- FAST PAY: One-Click UPI App Launch (No Screenshot / Scanning Needed) -->
+                <div class="ypg-direct-upi-apps-wrap" style="margin: 14px 0 16px 0; background: rgba(15, 23, 42, 0.6); border: 1.5px solid rgba(254, 147, 44, 0.35); border-radius: 12px; padding: 12px 14px;">
+                  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+                    <div style="font-size: 12px; font-weight: 800; color: #f8fafc; display: flex; align-items: center; gap: 6px;">
+                      <span>⚡</span>
+                      <span>Direct Pay via Mobile UPI App</span>
+                    </div>
+                    <span style="font-size: 10px; font-weight: 800; color: #10b981; background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); padding: 2px 7px; border-radius: 999px;">NO SCANNING NEEDED</span>
+                  </div>
+
+                  <!-- 3 Direct App Buttons -->
+                  <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 8px;">
+                    <button type="button" class="ypg-intent-btn" onclick="openUpiApp('phonepe')"
+                      style="display: flex; align-items: center; justify-content: center; gap: 6px; background: #ffffff; border: 1.5px solid #5f259f; color: #5f259f; font-weight: 800; font-size: 13px; padding: 10px 4px; border-radius: 9px; cursor: pointer; transition: all 0.15s ease; box-shadow: 0 2px 6px rgba(0,0,0,0.1);">
+                      <img src="/icons/phonepe.png" onerror="if(window.FALLBACK_ICONS)this.src=window.FALLBACK_ICONS.phonepe" alt="PhonePe" style="width: 20px; height: 20px; object-fit: contain;" />
+                      <span>PhonePe</span>
+                    </button>
+
+                    <button type="button" class="ypg-intent-btn" onclick="openUpiApp('gpay')"
+                      style="display: flex; align-items: center; justify-content: center; gap: 6px; background: #ffffff; border: 1.5px solid #1a73e8; color: #1a73e8; font-weight: 800; font-size: 13px; padding: 10px 4px; border-radius: 9px; cursor: pointer; transition: all 0.15s ease; box-shadow: 0 2px 6px rgba(0,0,0,0.1);">
+                      <img src="/icons/gpay.png" onerror="if(window.FALLBACK_ICONS)this.src=window.FALLBACK_ICONS.gpay" alt="GPay" style="width: 20px; height: 20px; object-fit: contain;" />
+                      <span>GPay</span>
+                    </button>
+
+                    <button type="button" class="ypg-intent-btn" onclick="openUpiApp('paytm')"
+                      style="display: flex; align-items: center; justify-content: center; gap: 6px; background: #ffffff; border: 1.5px solid #00baf2; color: #002970; font-weight: 800; font-size: 13px; padding: 10px 4px; border-radius: 9px; cursor: pointer; transition: all 0.15s ease; box-shadow: 0 2px 6px rgba(0,0,0,0.1);">
+                      <img src="/icons/paytm.png" onerror="if(window.FALLBACK_ICONS)this.src=window.FALLBACK_ICONS.paytm" alt="Paytm" style="width: 20px; height: 20px; object-fit: contain;" />
+                      <span>Paytm</span>
+                    </button>
+                  </div>
+
+                  <!-- Any UPI App Button -->
+                  <button type="button" class="ypg-intent-btn" onclick="openUpiApp('any')"
+                    style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, #fe932c 0%, #ea580c 100%); border: none; color: #ffffff; font-weight: 800; font-size: 13px; padding: 10px 12px; border-radius: 9px; cursor: pointer; transition: all 0.15s ease; box-shadow: 0 4px 12px rgba(254,147,44,0.35);">
+                    <span>🚀</span>
+                    <span id="btnAnyUpiText">Tap to Open in Any UPI App (CRED / BHIM / Bank)</span>
+                  </button>
+                </div>
+
                 <!-- UPI Payment Instructions Guide -->
                 <div class="ypg-instructions-card">
                   <div class="ypg-instruction-step">
@@ -6860,6 +6900,53 @@
         }
       }
     } catch (e) { }
+
+    function openUpiApp(provider) {
+      const vpa = (state && (state.payeeVpa || state.vpa)) || '{{VPA}}';
+      const name = (state && state.merchantName) || '{{MERCHANT_NAME}}';
+      const amount = (state && state.amount) || '{{AMOUNT}}';
+      const orderId = (state && (state.orderId || state.id)) || '{{ORDER_ID}}' || PAYMENT_ID;
+
+      const upiQuery = 'pa=' + encodeURIComponent(vpa) +
+        '&pn=' + encodeURIComponent(name) +
+        '&am=' + encodeURIComponent(amount) +
+        '&cu=INR' +
+        '&tn=' + encodeURIComponent(orderId);
+
+      const genericUri = 'upi://pay?' + upiQuery;
+      const isAndroid = /android/i.test(navigator.userAgent);
+      const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+
+      let targetUri = genericUri;
+      if (provider === 'phonepe') {
+        targetUri = isAndroid
+          ? 'intent://pay?' + upiQuery + '#Intent;scheme=upi;package=com.phonepe.app;end'
+          : 'phonepe://pay?' + upiQuery;
+      } else if (provider === 'gpay') {
+        targetUri = isAndroid
+          ? 'intent://pay?' + upiQuery + '#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end'
+          : 'gpay://upi/pay?' + upiQuery;
+      } else if (provider === 'paytm') {
+        targetUri = isAndroid
+          ? 'intent://pay?' + upiQuery + '#Intent;scheme=upi;package=net.one97.paytm;end'
+          : 'paytmmp://pay?' + upiQuery;
+      }
+
+      // If user is on a Desktop/Laptop PC, provide helpful prompt
+      if (!isAndroid && !isIOS) {
+        showToast ? showToast('Opening UPI link... (If on a computer, please scan the QR code above with your phone)') : alert('Opening UPI link... If you are on a computer, please scan the QR code with your mobile phone.');
+      }
+
+      // Launch intent
+      window.location.href = targetUri;
+
+      // Fallback to generic UPI after brief delay if specific app not installed
+      if (provider !== 'any') {
+        setTimeout(() => {
+          window.location.href = genericUri;
+        }, 1500);
+      }
+    }
 
     loadState();
     connectSse();
