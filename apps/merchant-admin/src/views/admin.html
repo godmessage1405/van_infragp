@@ -3162,7 +3162,7 @@
             <li>In <strong>Google Cloud Console</strong> &gt; <em>Credentials</em>, add this exact redirect URI:
               <code
                 style="color:#38bdf8; display:block; margin:0.2rem 0; background:#020617; padding:2px 6px; border-radius:4px;"
-                id="guideProdUri">https://pay-gmail.infravan.tech/oauth/callback</code>
+                id="guideProdUri">https://pg-gmail.infravan.tech/oauth/callback</code>
             </li>
             <li>Under <em>OAuth consent screen</em> &gt; <em>Test users</em>, ensure your personal Gmail address is
               added.</li>
@@ -5012,7 +5012,7 @@
 
     // --- GMAIL DIRECT API & AUTOMATED GOOGLE LOGIN ---
     function copyGmailRedirectUri() {
-      const uri = document.getElementById('gmailRedirectUriInput')?.value || 'https://pay-gmail.infravan.tech/oauth/callback';
+      const uri = document.getElementById('gmailRedirectUriInput')?.value || 'https://pg-gmail.infravan.tech/oauth/callback';
       navigator.clipboard.writeText(uri).then(() => {
         showAdminToast('Redirect URI copied to clipboard!');
       });
@@ -5142,7 +5142,7 @@
         if (document.getElementById('gmailClientSecretInput')) document.getElementById('gmailClientSecretInput').value = cfg.clientSecret || data.clientSecret || '';
         if (document.getElementById('gmailRefreshTokenInput')) document.getElementById('gmailRefreshTokenInput').value = cfg.refreshToken || '';
 
-        const redirectUri = data.redirectUri || 'https://pay-gmail.infravan.tech/oauth/callback';
+        const redirectUri = data.redirectUri || 'https://pg-gmail.infravan.tech/oauth/callback';
         if (document.getElementById('gmailRedirectUriInput')) document.getElementById('gmailRedirectUriInput').value = redirectUri;
         if (document.getElementById('guideProdUri')) document.getElementById('guideProdUri').textContent = redirectUri;
 

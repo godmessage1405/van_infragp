@@ -70,7 +70,7 @@ export class GmailObserverServer {
             : (process.env.GMAIL_CLIENT_ID || 'mock-youpi-client-id.apps.googleusercontent.com');
         }
 
-        const finalRedirectUri = 'https://pay-gmail.infravan.tech/oauth/callback';
+        const finalRedirectUri = 'https://pg-gmail.infravan.tech/oauth/callback';
         const scope = encodeURIComponent('https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/userinfo.email');
         const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${encodeURIComponent(clientId)}&redirect_uri=${encodeURIComponent(finalRedirectUri)}&response_type=code&scope=${scope}&access_type=offline&prompt=consent&include_granted_scopes=true`;
 
@@ -133,7 +133,7 @@ export class GmailObserverServer {
             return;
           }
 
-          const redirectUri = 'https://pay-gmail.infravan.tech/oauth/callback';
+          const redirectUri = 'https://pg-gmail.infravan.tech/oauth/callback';
           console.log(`[Gmail Observer] Exchanging OAuth code for tokens with Client ID: ${clientId.substring(0, 15)}... and Redirect URI: ${redirectUri}`);
 
           const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
