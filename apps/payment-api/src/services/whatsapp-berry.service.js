@@ -10,6 +10,7 @@ const rootDir = path.resolve(__dirname, '../../../..');
 
 let BerryProtocolClass = null;
 let qrcodeLib = null;
+let lastDependencyError = null;
 
 async function loadDependencies() {
   if (!BerryProtocolClass) {
@@ -17,20 +18,30 @@ async function loadDependencies() {
       'berryprotocol',
       pathToFileURL(path.resolve(rootDir, 'node_modules/berryprotocol/dist/index.js')).href,
       pathToFileURL(path.resolve(rootDir, 'apps/payment-api/node_modules/berryprotocol/dist/index.js')).href,
+      'file:///C:/infravan-pg/node_modules/berryprotocol/dist/index.js',
+      'file:///C:/infravan-pg/apps/payment-api/node_modules/berryprotocol/dist/index.js',
       'file:///D:/WA-USERAUTH DEV/node_modules/berryprotocol/dist/index.js',
       'file:///D:/E-Commerce PKG/services/whatsapp-worker/node_modules/berryprotocol/dist/index.js',
       'file:///D:/ECOM AND YOUPI PG INTEGRATION/E-Commerce PACKAGE/services/whatsapp-worker/node_modules/berryprotocol/dist/index.js',
       'file:///D:/distribution/services/whatsapp-worker/node_modules/berryprotocol/dist/index.js'
     ];
+    let lastErr = null;
     for (const p of candidates) {
       try {
         const mod = await import(p);
         BerryProtocolClass = mod.BerryProtocol || mod.default;
         if (BerryProtocolClass) {
           console.log(`[WhatsAppBerryService] Loaded BerryProtocol engine from: ${p}`);
+          lastDependencyError = null;
           break;
         }
-      } catch {}
+      } catch (err) {
+        lastErr = err;
+      }
+    }
+    if (!BerryProtocolClass && lastErr) {
+      lastDependencyError = lastErr.message;
+      console.error(`[WhatsAppBerryService] Failed to load BerryProtocol candidate: ${lastErr.message}`);
     }
   }
   if (!qrcodeLib) {
@@ -38,6 +49,8 @@ async function loadDependencies() {
       'qrcode',
       pathToFileURL(path.resolve(rootDir, 'node_modules/qrcode/lib/index.js')).href,
       pathToFileURL(path.resolve(rootDir, 'apps/payment-api/node_modules/qrcode/lib/index.js')).href,
+      'file:///C:/infravan-pg/node_modules/qrcode/lib/index.js',
+      'file:///C:/infravan-pg/apps/payment-api/node_modules/qrcode/lib/index.js',
       'file:///D:/WA-USERAUTH DEV/node_modules/qrcode/lib/index.js',
       'file:///D:/E-Commerce PKG/services/whatsapp-worker/node_modules/qrcode/lib/index.js',
       'file:///D:/ECOM AND YOUPI PG INTEGRATION/E-Commerce PACKAGE/services/whatsapp-worker/node_modules/qrcode/lib/index.js',
@@ -51,7 +64,7 @@ async function loadDependencies() {
       } catch {}
     }
   }
-  return { BerryProtocol: BerryProtocolClass, qrcode: qrcodeLib };
+  return { BerryProtocol: BerryProtocolClass, qrcode: qrcodeLib, error: lastDependencyError };
 }
 
 /**
@@ -117,6 +130,7 @@ export class WhatsAppBerryService extends EventEmitter {
     this.shouldKeepPairingAlive = true;
     this.reconnectTimer = null;
     this.isSimulatedMode = false;
+    this.lastError = null;
 
     // Check if previous valid connection session exists on disk
     this.restoreSessionMeta();
@@ -275,14 +289,17 @@ export class WhatsAppBerryService extends EventEmitter {
 
     try {
       this.ensureDirectories();
-      const { BerryProtocol, qrcode } = await loadDependencies();
+      const { BerryProtocol, qrcode, error } = await loadDependencies();
 
       if (!BerryProtocol) {
-        console.error('[WhatsAppBerryService] ERROR: BerryProtocol package not found. Run "npm install".');
+        const errMsg = error || 'BerryProtocol package not found. Run "npm install berryprotocol qrcode".';
+        console.error(`[WhatsAppBerryService] ERROR: ${errMsg}`);
         this.status = 'DISCONNECTED';
+        this.lastError = errMsg;
         this.emit('status', this.status);
-        return;
+        throw new Error(errMsg);
       }
+      this.lastError = null;
 
       console.log(`[WhatsAppBerryService] Initializing BerryProtocol client (Session: ${this.sessionId})...`);
 
@@ -489,7 +506,8 @@ export class WhatsAppBerryService extends EventEmitter {
       status: this.status,
       isConnected: this.status === 'CONNECTED',
       pairingCode: this.pairingCode,
-      pairingPhone: this.pairingPhone
+      pairingPhone: this.pairingPhone,
+      error: this.lastError || null
     };
   }
 

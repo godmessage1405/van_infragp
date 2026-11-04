@@ -5353,13 +5353,30 @@
         } else {
           if (badge) { badge.className = 'badge badge-danger'; badge.innerText = 'DISCONNECTED'; }
           if (dot) dot.style.color = '#ef4444';
-          if (title) title.innerText = 'Session Disconnected';
-          if (phoneDisplay) phoneDisplay.innerText = 'No WhatsApp session active';
+          if (title) title.innerText = data.error ? 'WhatsApp Module Error' : 'Session Disconnected';
+          if (phoneDisplay) {
+            if (data.error) {
+              phoneDisplay.innerHTML = '<span style="color:#f87171; font-weight:600;">⚠️ ' + escapeHtml(data.error) + '</span>';
+            } else {
+              phoneDisplay.innerText = 'No WhatsApp session active';
+            }
+          }
           if (qrBox) qrBox.style.display = 'inline-block';
           if (qrImg) qrImg.style.display = 'none';
           if (qrPlaceholder) {
             qrPlaceholder.style.display = 'flex';
-            qrPlaceholder.innerText = 'Click "Connect WhatsApp" to pair device';
+            if (data.error) {
+              qrPlaceholder.innerHTML = '<div style="text-align:center; padding:1.2rem; color:#f87171;">' +
+                '<div style="font-size:1.6rem; margin-bottom:0.4rem;">⚠️</div>' +
+                '<div style="font-weight:700; font-size:0.92rem; color:#fca5a5;">Module Not Installed</div>' +
+                '<div style="font-size:0.8rem; margin-top:0.4rem; color:#cbd5e1; word-break:break-word;">' + escapeHtml(data.error) + '</div>' +
+                '<div style="margin-top:0.8rem; font-size:0.75rem; color:#94a3b8; background:#0f172a; padding:6px 10px; border-radius:6px; border:1px solid #334155;">' +
+                  'Run on VPS: <br/><code style="color:#38bdf8; font-weight:bold;">npm install berryprotocol qrcode</code>' +
+                '</div>' +
+              '</div>';
+            } else {
+              qrPlaceholder.innerText = 'Click "Connect WhatsApp" to pair device';
+            }
           }
           if (btnDisconnect) btnDisconnect.style.display = 'none';
           if (btnConnect) btnConnect.innerText = '⚡ Connect WhatsApp';
@@ -5380,9 +5397,15 @@
           method: 'POST',
           headers: { 'Content-Type': 'application/json' }
         });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || data.error) {
+          const errText = data.error || 'Failed to initialize WhatsApp pairing';
+          showAdminToast('WhatsApp Error: ' + errText, 'error');
+        }
         await fetchWhatsAppStatus();
       } catch (e) {
-        alert('Network error initiating WhatsApp pairing');
+        showAdminToast('Network error initiating WhatsApp pairing: ' + e.message, 'error');
+        alert('Network error initiating WhatsApp pairing: ' + e.message);
       } finally {
         btn.disabled = false;
         btn.innerText = oldText;

@@ -29,7 +29,11 @@ if %ERRORLEVEL% NEQ 0 (
 :: 2. Check dependencies
 if not exist "node_modules\" (
     echo [*] First run detected. Installing dependencies...
-    call npm install --omit=dev --no-audit --no-fund
+    call npm install --no-audit --no-fund
+    echo.
+) else if not exist "node_modules\berryprotocol\" (
+    echo [*] Installing missing WhatsApp Berry & gateway dependencies...
+    call npm install --no-audit --no-fund
     echo.
 )
 

@@ -22,6 +22,10 @@
     "test:acceptance": "node --test scripts/production-infrastructure.test.js",
     "typecheck": "tsc -b --noEmit"
   },
+  "dependencies": {
+    "berryprotocol": "^0.1.10",
+    "qrcode": "^1.5.4"
+  },
   "devDependencies": {
     "@types/node": "^22.13.0",
     "typescript": "^5.7.3"

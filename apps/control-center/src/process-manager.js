@@ -164,8 +164,14 @@ export class ProcessManager extends EventEmitter {
     svc.startTime = Date.now();
     svc.status = 'RUNNING';
 
-    child.stdout?.on('data', data => this.appendLog(svc.id, 'stdout', data));
-    child.stderr?.on('data', data => this.appendLog(svc.id, 'stderr', data));
+    child.stdout?.on('data', data => {
+      this.appendLog(svc.id, 'stdout', data);
+      process.stdout.write([] );
+    });
+    child.stderr?.on('data', data => {
+      this.appendLog(svc.id, 'stderr', data);
+      process.stderr.write([] );
+    });
 
     child.on('exit', (code, signal) => {
       this.appendLog(svc.id, 'system', `Process exited with code ${code} (signal: ${signal})`);

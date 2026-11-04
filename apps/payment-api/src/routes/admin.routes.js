@@ -1134,7 +1134,8 @@ export function registerAdminRoutes(server, ctx) {
       isConnected: info.isConnected,
       qrCode: qrPayload || qr?.dataUrl || qr?.raw || (typeof qr === 'string' ? qr : null),
       pairingCode: info.pairingCode || null,
-      pairingPhone: info.pairingPhone || null
+      pairingPhone: info.pairingPhone || null,
+      error: info.error || null
     });
   });
 
@@ -1205,13 +1206,24 @@ export function registerAdminRoutes(server, ctx) {
         }
       }
 
+      if (berry.getStatus() === 'DISCONNECTED' && berry.lastError) {
+        HttpServer.json(res, 400, {
+          success: false,
+          status: berry.getStatus(),
+          error: berry.lastError,
+          qrCode: null
+        });
+        return;
+      }
+
       HttpServer.json(res, 200, {
         success: true,
         status: berry.getStatus(),
-        qrCode: qrPayload || qr?.dataUrl || qr?.raw || (typeof qr === 'string' ? qr : null)
+        qrCode: qrPayload || qr?.dataUrl || qr?.raw || (typeof qr === 'string' ? qr : null),
+        error: berry.lastError || null
       });
     } catch (err) {
-      HttpServer.json(res, 500, { error: err.message });
+      HttpServer.json(res, 500, { success: false, status: berry.getStatus(), error: err.message });
     }
   });
 
