@@ -930,4 +930,100 @@ describe('Payment API End-to-End HTTP Integration Tests', () => {
     assert.equal(oldDateRes.status, 400);
     assert.equal(oldDateRes.body.code, 'OBSERVATION_NOT_TODAY');
   });
+
+  test('Configurable Queue Mode: When Queue is OFF, unlimited concurrent users pay at once and verify via UTR', async () => {
+    // 1. Turn OFF Queue Mode via Admin Settings
+    const disableQueueRes = await request('/api/v1/admin/merchant-settings', {
+      method: 'POST',
+      body: {
+        queueEnabled: false,
+        branding: { queueEnabled: false }
+      }
+    });
+    assert.equal(disableQueueRes.status, 200);
+
+    // 2. Create 3 concurrent payments on the same receiving VPA
+    const pay1 = await request('/api/v1/payments', {
+      method: 'POST',
+      body: {
+        orderId: 'MULTI-PARALLEL-001',
+        amount: '100.00',
+        currency: 'INR',
+        autoActivate: true
+      }
+    });
+    assert.equal(pay1.status, 201);
+    assert.equal(pay1.body.status, PaymentStatus.ACTIVE);
+    assert.equal(pay1.body.queuePosition, 0);
+
+    const pay2 = await request('/api/v1/payments', {
+      method: 'POST',
+      body: {
+        orderId: 'MULTI-PARALLEL-002',
+        amount: '100.00',
+        currency: 'INR',
+        autoActivate: true
+      }
+    });
+    assert.equal(pay2.status, 201);
+    // Crucial: Must be ACTIVE, NOT QUEUED!
+    assert.equal(pay2.body.status, PaymentStatus.ACTIVE);
+    assert.equal(pay2.body.queuePosition, 0);
+
+    const pay3 = await request('/api/v1/payments', {
+      method: 'POST',
+      body: {
+        orderId: 'MULTI-PARALLEL-003',
+        amount: '100.00',
+        currency: 'INR',
+        autoActivate: true
+      }
+    });
+    assert.equal(pay3.status, 201);
+    // Crucial: Also ACTIVE, NOT QUEUED!
+    assert.equal(pay3.body.status, PaymentStatus.ACTIVE);
+    assert.equal(pay3.body.queuePosition, 0);
+
+    // 3. User 2 submits UTR "777666555444"
+    // Ingest bank credit with ₹100 and UTR "777666555444"
+    const obs2 = await request('/api/v1/pollers/events', {
+      method: 'POST',
+      body: {
+        source: 'GMAIL',
+        receivingAccountId: '00000000-0000-0000-0000-000000000002',
+        amount: '100.00',
+        utr: '777666555444',
+        observedAt: new Date().toISOString()
+      }
+    });
+    assert.equal(obs2.status, 200);
+
+    const submitRes2 = await request('/api/v1/checkout/' + pay2.body.paymentId + '/submit-utr', {
+      method: 'POST',
+      body: { utr: '777666555444' }
+    });
+    assert.equal(submitRes2.status, 200);
+    assert.equal(submitRes2.body.status, 'SUCCESS');
+    assert.equal(submitRes2.body.utr, '777666555444');
+
+    // 4. Verify Pay 2 is SUCCESS, while Pay 1 and Pay 3 remain ACTIVE without collision
+    const state2 = await request('/api/v1/checkout/' + pay2.body.paymentId + '/state');
+    assert.equal(state2.body.status, 'SUCCESS');
+    assert.equal(state2.body.utr, '777666555444');
+
+    const state1 = await request('/api/v1/checkout/' + pay1.body.paymentId + '/state');
+    assert.equal(state1.body.status, 'ACTIVE');
+
+    const state3 = await request('/api/v1/checkout/' + pay3.body.paymentId + '/state');
+    assert.equal(state3.body.status, 'ACTIVE');
+
+    // 5. Turn Queue Mode back ON
+    await request('/api/v1/admin/merchant-settings', {
+      method: 'POST',
+      body: {
+        queueEnabled: true,
+        branding: { queueEnabled: true }
+      }
+    });
+  });
 });

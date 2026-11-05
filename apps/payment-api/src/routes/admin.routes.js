@@ -651,6 +651,7 @@ export function registerAdminRoutes(server, ctx) {
       supportMobiles,
       privacyPolicyUrl,
       sellingMode,
+      queueEnabled: branding.queueEnabled !== false,
       branding: {
         appName: branding.appName || 'YOUPI PG',
         primaryColor: branding.primaryColor || '#2563eb',
@@ -671,7 +672,8 @@ export function registerAdminRoutes(server, ctx) {
         enabledPaymentMethods,
         supportEmails,
         supportMobiles,
-        privacyPolicyUrl
+        privacyPolicyUrl,
+        queueEnabled: branding.queueEnabled !== false
       }
     });
   });
@@ -763,6 +765,10 @@ export function registerAdminRoutes(server, ctx) {
     }
     if (body.customDomain !== undefined || inputBranding.customDomain !== undefined) {
       mergedBranding.customDomain = (body.customDomain || inputBranding.customDomain || '').trim();
+    }
+    if (body.queueEnabled !== undefined || inputBranding.queueEnabled !== undefined) {
+      const qVal = body.queueEnabled !== undefined ? body.queueEnabled : inputBranding.queueEnabled;
+      mergedBranding.queueEnabled = Boolean(qVal);
     }
 
     updates.branding = mergedBranding;
@@ -918,7 +924,8 @@ export function registerAdminRoutes(server, ctx) {
       body.domainPrefix !== undefined ||
       body.domainTld !== undefined ||
       body.customDomain !== undefined ||
-      body.cloudflareTunnelCommand !== undefined
+      body.cloudflareTunnelCommand !== undefined ||
+      body.queueEnabled !== undefined
     ) {
       const currentBranding = merchant.branding || {};
       const mergedBranding = { ...currentBranding };
@@ -1001,6 +1008,10 @@ export function registerAdminRoutes(server, ctx) {
       }
       if (body.cloudflareTunnelCommand !== undefined || inputBranding.cloudflareTunnelCommand !== undefined) {
         mergedBranding.cloudflareTunnelCommand = (body.cloudflareTunnelCommand !== undefined ? body.cloudflareTunnelCommand : inputBranding.cloudflareTunnelCommand)?.trim() || '';
+      }
+      if (body.queueEnabled !== undefined || inputBranding.queueEnabled !== undefined) {
+        const qVal = body.queueEnabled !== undefined ? body.queueEnabled : inputBranding.queueEnabled;
+        mergedBranding.queueEnabled = Boolean(qVal);
       }
 
       updates.branding = mergedBranding;

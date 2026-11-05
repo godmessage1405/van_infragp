@@ -1489,6 +1489,24 @@
                 </div>
               </div>
 
+              <!-- SECTION 6: CONCURRENCY & MULTI-CUSTOMER QUEUE -->
+              <div class="settings-group-box">
+                <div class="group-box-title" style="display:flex; justify-content:space-between; align-items:center;">
+                  <span>⚡ 6. Queue &amp; Multi-Customer Payment Concurrency</span>
+                  <span id="queueModeBadge" class="badge badge-success">Queue: Active</span>
+                </div>
+                <div style="background:rgba(255,255,255,0.02); border:1px solid var(--border); border-radius:8px; padding:0.9rem;">
+                  <label style="display:flex; align-items:center; gap:0.65rem; cursor:pointer; font-weight:700; font-size:0.88rem; color:var(--text-heading);">
+                    <input type="checkbox" id="settingQueueEnabled" checked onchange="updateQueueModeBadge()" style="width:18px; height:18px; accent-color:#10b981; cursor:pointer;" />
+                    <span>Single-Customer Queue Active (1 Person at a Time)</span>
+                  </label>
+                  <div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.5rem; line-height:1.5;">
+                    • <strong>When Checked (ON)</strong>: Customers wait in a sequential queue so only 1 person pays on the UPI ID at a time.<br/>
+                    • <strong>When Unchecked (OFF - Multi-Customer Mode)</strong>: Unlimited customers can pay at the exact same time! Since every transaction is verified with <strong>Amount + Date + 12-digit UTR</strong>, payments are attributed individually without waiting in line!
+                  </div>
+                </div>
+              </div>
+
               <button class="btn btn-primary"
                 style="padding:0.85rem 1.75rem; font-size:0.95rem; width:100%; justify-content:center;"
                 onclick="saveMerchantBrandingAndToggles()">
@@ -3930,6 +3948,23 @@
       } catch (e) { }
     }
 
+    
+    function updateQueueModeBadge() {
+      const chk = document.getElementById('settingQueueEnabled');
+      const badge = document.getElementById('queueModeBadge');
+      if (chk && badge) {
+        if (chk.checked) {
+          badge.className = 'badge badge-success';
+          badge.style.background = '';
+          badge.textContent = 'Queue: Active (1 Person)';
+        } else {
+          badge.className = 'badge badge-info';
+          badge.style.background = '#0284c7';
+          badge.textContent = '⚡ Multi-Customer Parallel Mode';
+        }
+      }
+    }
+
     function renderSlotActive(currentSlot) {
       const box = document.getElementById('slotActiveBox');
       const content = document.getElementById('slotActiveContent');
@@ -4349,6 +4384,8 @@
           setVal('settingSidebarNotice', branding.sidebarNotice);
           setVal('settingFooterGuarantee', branding.footerGuarantee);
           setVal('settingCounterInstructions', branding.counterInstructions);
+          setCheck('settingQueueEnabled', branding.queueEnabled !== false);
+          if (typeof updateQueueModeBadge === 'function') updateQueueModeBadge();
           setVal('settingPrimaryColor', branding.primaryColor || '#0b63e5');
           setVal('settingColorPicker', branding.primaryColor || '#0b63e5');
 
@@ -4546,6 +4583,7 @@
       const hidePoweredBy = document.getElementById('settingHidePoweredBy')?.checked || false;
       const cardCounterInstructions = document.getElementById('settingCardCounterInstructions')?.value.trim() || '';
       const termsUrl = document.getElementById('settingTermsUrl')?.value.trim() || '';
+      const queueEnabled = document.getElementById('settingQueueEnabled')?.checked ?? true;
 
       const codChecked = document.getElementById('toggleMethodCod')?.checked ?? true;
       const cashChecked = document.getElementById('toggleMethodCash')?.checked ?? true;
@@ -4571,6 +4609,7 @@
             supportMobiles,
             privacyPolicyUrl: privacyPolicyUrl || null,
             termsUrl: termsUrl || null,
+            queueEnabled,
             sellingMode: currentSellingMode,
             enabledPaymentMethods: enabledMethods,
             codEnabled: codChecked,
@@ -4596,6 +4635,7 @@
               counterInstructions: counterInstructions || null,
               cardCounterInstructions: cardCounterInstructions || null,
               termsUrl: termsUrl || null,
+              queueEnabled,
               sellingMode: currentSellingMode,
               enabledPaymentMethods: enabledMethods,
               codEnabled: codChecked,

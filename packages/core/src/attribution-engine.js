@@ -207,26 +207,13 @@ export class AttributionEngine {
       }
     }
 
-    // Tier 2: Check currently active session on receiving account
+    // Tier 2: Match target session
     let currentSession = null;
     if (normalizedObs.rawPayload?.targetSessionId) {
       currentSession = this.sessionRepo.findById(normalizedObs.rawPayload.targetSessionId);
     }
-    if (!currentSession || (currentSession.amountPaise !== normalizedObs.amountPaise)) {
-      currentSession = this.sessionRepo.findCurrentActiveOrProcessing(normalizedObs.receivingAccountId);
-    }
-    if (currentSession && currentSession.amountPaise !== normalizedObs.amountPaise) {
-      const matchRow = this.sessionRepo.db.queryOne(`
-        SELECT * FROM payment_sessions
-        WHERE receiving_account_id = ? AND status IN ('ACTIVE', 'PROCESSING') AND amount_paise = ?
-        ORDER BY created_at DESC
-        LIMIT 1
-      `, [normalizedObs.receivingAccountId, Number(normalizedObs.amountPaise)]);
-      if (matchRow) {
-        currentSession = this.sessionRepo.mapRow(matchRow);
-      }
-    }
-    // Check if any ACTIVE, PROCESSING, or PARTIALLY_PAID session explicitly submitted this UTR
+
+    // Priority 1: Exact UTR match on submittedUtr (Individual Multi-Customer UTR Attribution)
     if (!currentSession && normalizedObs.bankReferenceNumber) {
       const cleanUtr = String(normalizedObs.bankReferenceNumber).trim().toUpperCase();
       const utrMatch = this.sessionRepo.db.queryOne(`
@@ -243,16 +230,59 @@ export class AttributionEngine {
       }
     }
 
+    // Priority 2: Receiving account & amount match
+    // Only auto-attribute by amount if there is AT MOST 1 active/processing session with this exact amount
+    // on this receiving account (or active count is 1).
+    // If multiple sessions are concurrently active (multi-customer parallel mode) and this observation has a UTR,
+    // do NOT auto-assign to a random session. Keep the observation unattributed until the customer submits their UTR!
     if (!currentSession) {
-      // Fallback: Check if there is an ACTIVE or PROCESSING session matching this exact amount anywhere on the gateway
-      const anyActive = this.sessionRepo.db.queryOne(`
-        SELECT * FROM payment_sessions
+      const activeSameAmountCount = this.sessionRepo.db.queryOne(`
+        SELECT COUNT(*) as count FROM payment_sessions
+        WHERE receiving_account_id = ? AND status IN ('ACTIVE', 'PROCESSING') AND amount_paise = ?
+      `, [normalizedObs.receivingAccountId, Number(normalizedObs.amountPaise)])?.count || 0;
+
+      if (activeSameAmountCount === 1) {
+        const matchRow = this.sessionRepo.db.queryOne(`
+          SELECT * FROM payment_sessions
+          WHERE receiving_account_id = ? AND status IN ('ACTIVE', 'PROCESSING') AND amount_paise = ?
+          ORDER BY created_at DESC
+          LIMIT 1
+        `, [normalizedObs.receivingAccountId, Number(normalizedObs.amountPaise)]);
+        if (matchRow) {
+          currentSession = this.sessionRepo.mapRow(matchRow);
+        }
+      }
+    }
+
+    if (!currentSession) {
+      const totalActiveCount = this.sessionRepo.db.queryOne(`
+        SELECT COUNT(*) as count FROM payment_sessions
+        WHERE receiving_account_id = ? AND status IN ('ACTIVE', 'PROCESSING')
+      `, [normalizedObs.receivingAccountId])?.count || 0;
+
+      if (totalActiveCount === 1) {
+        currentSession = this.sessionRepo.findCurrentActiveOrProcessing(normalizedObs.receivingAccountId);
+      }
+    }
+
+    if (!currentSession) {
+      // Fallback: Check if there is an ACTIVE or PROCESSING session matching this exact amount anywhere on the gateway,
+      // but only if there is exactly 1 such session gateway-wide to prevent cross-customer collision.
+      const totalGatewayMatches = this.sessionRepo.db.queryOne(`
+        SELECT COUNT(*) as count FROM payment_sessions
         WHERE status IN ('ACTIVE', 'PROCESSING') AND amount_paise = ?
-        ORDER BY created_at DESC
-        LIMIT 1
-      `, [Number(normalizedObs.amountPaise)]);
-      if (anyActive) {
-        currentSession = this.sessionRepo.mapRow(anyActive);
+      `, [Number(normalizedObs.amountPaise)])?.count || 0;
+
+      if (totalGatewayMatches === 1) {
+        const anyActive = this.sessionRepo.db.queryOne(`
+          SELECT * FROM payment_sessions
+          WHERE status IN ('ACTIVE', 'PROCESSING') AND amount_paise = ?
+          ORDER BY created_at DESC
+          LIMIT 1
+        `, [Number(normalizedObs.amountPaise)]);
+        if (anyActive) {
+          currentSession = this.sessionRepo.mapRow(anyActive);
+        }
       }
     }
 

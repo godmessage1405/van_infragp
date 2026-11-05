@@ -82,10 +82,43 @@ export class PaymentSessionRepository {
    * If slot is free, session transitions to ACTIVE with 5:00 window.
    * If slot is occupied, session transitions to QUEUED with sequence position.
    */
-  acquireSlotAtomic(sessionId, receivingAccountId, durationMs = 300000) {
+  acquireSlotAtomic(sessionId, receivingAccountId, durationMs = 300000, options = {}) {
     return this.db.transaction(() => {
       const now = new Date();
       const nowIso = now.toISOString();
+
+      // Check if queue concurrency is disabled (Multi-Customer Mode)
+      let isQueueDisabled = options.queueEnabled === false;
+      if (!isQueueDisabled) {
+        const session = this.findById(sessionId);
+        if (session?.merchantId) {
+          const merchantRow = this.db.queryOne('SELECT branding FROM merchants WHERE id = ?', [session.merchantId]);
+          if (merchantRow && merchantRow.branding) {
+            try {
+              const b = typeof merchantRow.branding === 'string' ? JSON.parse(merchantRow.branding) : merchantRow.branding;
+              if (b.queueEnabled === false) {
+                isQueueDisabled = true;
+              }
+            } catch {}
+          }
+        }
+      }
+
+      if (isQueueDisabled) {
+        // Multi-Customer Mode: Queue disabled! Immediate activation without waiting or locking slot
+        const expiresAt = new Date(now.getTime() + durationMs).toISOString();
+        this.db.execute(`
+          UPDATE payment_sessions
+          SET status = ?, slot_acquired_at = ?, expires_at = ?, queue_position = 0, updated_at = ?
+          WHERE id = ?
+        `, [PaymentStatus.ACTIVE, nowIso, expiresAt, nowIso, sessionId]);
+
+        return {
+          status: PaymentStatus.ACTIVE,
+          queuePosition: 0,
+          expiresAt: new Date(expiresAt)
+        };
+      }
 
       // Check for current active or processing session on this receiving account
       let activeRow = this.db.queryOne(`
