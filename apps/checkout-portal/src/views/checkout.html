@@ -7096,35 +7096,37 @@
     function dispatchUpiIntent(uri, fallback) {
       if (!uri) return;
 
-      // Method 1: Invisible top-level anchor click (most reliable in Android Chrome & iframes)
+      // Method 0: If embedded in iframe, inform parent window (youpi.js) to trigger at top level
+      try {
+        if (window.parent && window.parent !== window) {
+          window.parent.postMessage({ event: 'youpi.open_upi_url', url: uri, fallback: fallback }, '*');
+        }
+      } catch (e) {}
+
+      // Method 1: Invisible anchor click with no target (or _top)
       try {
         const a = document.createElement('a');
         a.href = uri;
         a.target = '_top';
         a.rel = 'noopener noreferrer';
+        a.style.display = 'none';
         document.body.appendChild(a);
         a.click();
         setTimeout(() => {
           try { document.body.removeChild(a); } catch {}
-        }, 500);
+        }, 1000);
       } catch (err) {
         console.warn('Anchor intent dispatch error:', err);
       }
 
-      // Method 2: Direct window.top / window.location fallback after short tick
+      // Method 2: Direct window.location.href assignment (Android Chrome handles intent: & custom schemes via href)
       setTimeout(() => {
         try {
-          if (window.top && window.top !== window) {
-            window.top.location.href = uri;
-          } else {
-            window.location.href = uri;
-          }
-        } catch {
-          try { window.location.href = uri; } catch {}
-        }
-      }, 120);
+          window.location.href = uri;
+        } catch (e) {}
+      }, 50);
 
-      // Method 3: Fallback scheme if primary intent was blocked or app not captured
+      // Method 3: Fallback scheme after 1200ms if primary app did not open and page is still focused
       if (fallback && fallback !== uri) {
         setTimeout(() => {
           if (!document.hidden) {
@@ -7132,12 +7134,15 @@
               const fb = document.createElement('a');
               fb.href = fallback;
               fb.target = '_top';
+              fb.rel = 'noopener noreferrer';
+              fb.style.display = 'none';
               document.body.appendChild(fb);
               fb.click();
-              setTimeout(() => {
-                try { document.body.removeChild(fb); } catch {}
-              }, 500);
-            } catch {}
+              setTimeout(() => { try { document.body.removeChild(fb); } catch {} }, 1000);
+            } catch (e) {}
+            try {
+              window.location.href = fallback;
+            } catch (e) {}
           }
         }, 1200);
       }
@@ -7154,33 +7159,35 @@
       const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent || '');
 
       let targetName = 'PhonePe';
-      let launcherUri = 'phonepe://';
-      let fallbackUri = 'phonepe://';
+      let launcherUri = '';
+      let fallbackUri = '';
+
+      const upiQuery = `pa=${encodeURIComponent(cleanVpa)}&pn=${encodeURIComponent(cleanName)}&cu=INR`;
 
       if (provider === 'phonepe') {
         targetName = 'PhonePe';
         launcherUri = isAndroid
-          ? 'intent:#Intent;package=com.phonepe.app;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;end;'
-          : 'phonepe://';
-        fallbackUri = 'phonepe://';
+          ? `intent://pay?${upiQuery}#Intent;scheme=upi;package=com.phonepe.app;end;`
+          : `phonepe://pay?${upiQuery}`;
+        fallbackUri = isAndroid ? `phonepe://pay?${upiQuery}` : `phonepe://`;
       } else if (provider === 'gpay') {
         targetName = 'Google Pay';
         launcherUri = isAndroid
-          ? 'intent:#Intent;package=com.google.android.apps.nbu.paisa.user;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;end;'
-          : 'gpay://';
-        fallbackUri = 'gpay://';
+          ? `intent://pay?${upiQuery}#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end;`
+          : `gpay://upi/pay?${upiQuery}`;
+        fallbackUri = `upi://pay?${upiQuery}`;
       } else if (provider === 'paytm') {
         targetName = 'Paytm';
         launcherUri = isAndroid
-          ? 'intent:#Intent;package=net.one97.paytm;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;end;'
-          : 'paytmmp://';
-        fallbackUri = 'paytmmp://';
+          ? `intent://pay?${upiQuery}#Intent;scheme=upi;package=net.one97.paytm;end;`
+          : `paytmmp://pay?${upiQuery}`;
+        fallbackUri = isAndroid ? `paytmmp://pay?${upiQuery}` : `paytmmp://`;
       } else {
         targetName = 'Any UPI App';
         launcherUri = isAndroid
-          ? `intent://pay?pa=${cleanVpa}&pn=${encodeURIComponent(cleanName)}&cu=INR#Intent;scheme=upi;end;`
-          : `upi://pay?pa=${cleanVpa}&pn=${encodeURIComponent(cleanName)}&cu=INR`;
-        fallbackUri = `upi://pay?pa=${cleanVpa}&pn=${encodeURIComponent(cleanName)}&cu=INR`;
+          ? `intent://pay?${upiQuery}#Intent;scheme=upi;end;`
+          : `upi://pay?${upiQuery}`;
+        fallbackUri = `upi://pay?${upiQuery}`;
       }
 
       currentTargetUri = launcherUri;
@@ -7197,7 +7204,7 @@
 
       // 2. Show clear guidance toast
       if (typeof showOptionToast === 'function') {
-        showOptionToast(`📋 Copied UPI ID: ${cleanVpa}! Opening ${targetApp}... In ${targetApp}, tap "To UPI ID", paste & pay ₹${amount}`);
+        showOptionToast(`📋 Copied UPI ID: ${cleanVpa}! Opening ${targetName}... In ${targetName}, transfer ₹${amount} & enter 12-digit UTR below.`);
       }
 
       // 3. Highlight and focus the Submit UTR box right on checkout screen
@@ -7205,7 +7212,7 @@
       const utrInput = document.getElementById('mainUtrInput');
       const stepInfo = document.getElementById('utrStepInfo');
       if (stepInfo) {
-        stepInfo.innerHTML = `✅ <strong>UPI ID copied:</strong> <code style="background:#0f172a; padding:2px 6px; border-radius:4px; color:#38bdf8; font-weight:700;">${cleanVpa}</code><br>Paste in ${targetApp} ("To UPI ID") and transfer <strong>₹${amount}</strong>. Then enter your <strong>12-digit UTR</strong> below:`;
+        stepInfo.innerHTML = `✅ <strong>UPI ID copied:</strong> <code style="background:#0f172a; padding:2px 6px; border-radius:4px; color:#38bdf8; font-weight:700;">${cleanVpa}</code><br>Opening ${targetName}... Transfer <strong>₹${amount}</strong> and enter your <strong>12-digit UTR</strong> below:`;
       }
       if (utrCard) {
         utrCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });

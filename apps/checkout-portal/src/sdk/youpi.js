@@ -489,6 +489,28 @@
             window.location.href = `${this.options.expiredUrl}${delim}order_id=${encodeURIComponent(result.order_id)}`;
           }
         });
+      } else if (event === 'youpi.open_upi_url' && e.data.url) {
+        const url = e.data.url;
+        try {
+          const a = document.createElement('a');
+          a.href = url;
+          a.target = '_top';
+          a.rel = 'noopener noreferrer';
+          a.style.display = 'none';
+          document.body.appendChild(a);
+          a.click();
+          setTimeout(() => { try { document.body.removeChild(a); } catch {} }, 1000);
+        } catch (err) {}
+        try {
+          window.location.href = url;
+        } catch (err) {}
+        if (e.data.fallback && e.data.fallback !== url) {
+          setTimeout(() => {
+            if (!document.hidden) {
+              try { window.location.href = e.data.fallback; } catch {}
+            }
+          }, 1200);
+        }
       } else if (event === 'youpi.modal_close' || event === 'youpi.close' || event === 'youpi.cancel' || event === 'youpi.payment_cancelled') {
         this._dispatchCancelled();
         const redirectUrl = e.data.redirectUrl;
