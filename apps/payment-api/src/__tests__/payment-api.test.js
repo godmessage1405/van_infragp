@@ -792,4 +792,80 @@ describe('Payment API End-to-End HTTP Integration Tests', () => {
       await new Promise(cb => mockReceiver.close(cb));
     }
   });
+
+  test('Manual UTR Submission & Partial Payment Verification Flow', async () => {
+    // 1. Create a payment for 500.00
+    const createRes = await request('/api/v1/payments', {
+      method: 'POST',
+      body: {
+        orderId: 'UTR-TEST-ORDER-101',
+        amount: '500.00',
+        currency: 'INR',
+        autoActivate: true
+      }
+    });
+    assert.equal(createRes.status, 201);
+    const paymentId = createRes.body.paymentId;
+
+    // Verify session is ACTIVE
+    const stateActive = await request('/api/v1/checkout/' + paymentId + '/state');
+    assert.equal(stateActive.body.status, 'ACTIVE');
+
+    // 2. Test Partial Payment: User pays 200.00 instead of 500.00
+    // Ingest bank notification with 200.00 and UTR: 530999888111
+    const obsPartial = await request('/api/v1/pollers/events', {
+      method: 'POST',
+      body: {
+        source: 'GMAIL',
+        receivingAccountId: '00000000-0000-0000-0000-000000000002',
+        amount: '200.00',
+        utr: '530999888111',
+        observedAt: new Date().toISOString()
+      }
+    });
+    assert.equal(obsPartial.status, 200);
+
+    // User submits UTR 530999888111
+    const utrPartialRes = await request('/api/v1/checkout/' + paymentId + '/submit-utr', {
+      method: 'POST',
+      body: { utr: '530999888111' }
+    });
+    assert.equal(utrPartialRes.status, 200);
+    assert.equal(utrPartialRes.body.status, 'PARTIALLY_PAID');
+    assert.equal(utrPartialRes.body.partiallyPaid, true);
+    assert.equal(utrPartialRes.body.amountPaid, '200.00');
+    assert.equal(utrPartialRes.body.remainingAmount, '300.00');
+
+    // Checkout state reflects PARTIALLY_PAID
+    const statePartial = await request('/api/v1/checkout/' + paymentId + '/state');
+    assert.equal(statePartial.body.status, 'PARTIALLY_PAID');
+    assert.equal(statePartial.body.partiallyPaid, true);
+    assert.equal(statePartial.body.amountPaid, '200.00');
+    assert.equal(statePartial.body.remainingAmount, '300.00');
+
+    // 3. Test Full Payment: Ingest full payment observation with 500.00 and UTR 530999888222
+    const obsFull = await request('/api/v1/pollers/events', {
+      method: 'POST',
+      body: {
+        source: 'GMAIL',
+        receivingAccountId: '00000000-0000-0000-0000-000000000002',
+        amount: '500.00',
+        utr: '530999888222',
+        observedAt: new Date().toISOString()
+      }
+    });
+    assert.equal(obsFull.status, 200);
+
+    // User submits full payment UTR 530999888222
+    const utrFullRes = await request('/api/v1/checkout/' + paymentId + '/submit-utr', {
+      method: 'POST',
+      body: { utr: '530999888222' }
+    });
+    assert.equal(utrFullRes.status, 200);
+    assert.equal(utrFullRes.body.status, 'SUCCESS');
+
+    // Checkout state reflects SUCCESS
+    const stateFull = await request('/api/v1/checkout/' + paymentId + '/state');
+    assert.equal(stateFull.body.status, 'SUCCESS');
+  });
 });

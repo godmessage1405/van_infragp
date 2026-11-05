@@ -129,6 +129,11 @@ export class ObservationNormalizer {
       const refMatch = textContent.match(REFERENCE_REGEX);
       if (refMatch && refMatch[1]) {
         bankRef = refMatch[1].trim();
+      } else {
+        const twelveDigit = textContent.match(/\b(\d{12})\b/);
+        if (twelveDigit && twelveDigit[1]) {
+          bankRef = twelveDigit[1].trim();
+        }
       }
     }
 

@@ -171,6 +171,22 @@ export function createPaymentApp(customDb = null, options = {}) {
     });
   });
 
+  eventEmitter.on('PAYMENT.PARTIALLY_PAID', (data) => {
+    const session = sessionRepo.findById(data.paymentId);
+    if (session) {
+      server.broadcastSse(session.id, 'status_change', {
+        status: 'PARTIALLY_PAID',
+        partiallyPaid: true,
+        amountPaid: data.paidRupees,
+        remainingAmount: data.remainingRupees,
+        amountPaidPaise: Number(data.paidPaise),
+        remainingPaise: Number(data.remainingPaise),
+        utr: data.utr,
+        message: `Partially paid: ₹${data.paidRupees} received. Remaining balance: ₹${data.remainingRupees}`
+      });
+    }
+  });
+
   eventEmitter.on('PAYMENT.FAILED', (data) => {
     const session = sessionRepo.findById(data.paymentId);
     if (session) {

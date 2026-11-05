@@ -561,6 +561,9 @@ export function registerCheckoutRoutes(server, ctx) {
       amountPaise: session.amountPaise.toString(),
       currency: session.currency,
       status: session.status,
+      partiallyPaid: session.status === 'PARTIALLY_PAID' || Boolean(session.metadata?.partiallyPaid),
+      amountPaid: session.metadata?.amountPaid || null,
+      remainingAmount: session.metadata?.remainingAmount || null,
       reason: session.metadata?.cancelledReason || null,
       cancelledReason: session.metadata?.cancelledReason || null,
       metadata: session.metadata || {},
@@ -961,31 +964,115 @@ export function registerCheckoutRoutes(server, ctx) {
     });
 
     // 2. Check if an observation matching this UTR or amount already exists in DB
-    const unattributed = ctx.obsRepo.findUnattributed(session.receivingAccountId);
-    let matchedObs = unattributed.find(o =>
-      o.bankReferenceNumber && String(o.bankReferenceNumber).trim().toUpperCase() === cleanUtr.toUpperCase()
-    );
+    let matchedObs = ctx.obsRepo.db.queryOne(`
+      SELECT * FROM payment_observations
+      WHERE bank_reference_number = ? OR UPPER(bank_reference_number) = ?
+      ORDER BY observed_at DESC LIMIT 1
+    `, [cleanUtr, cleanUtr.toUpperCase()]);
 
-    // Also check if any unattributed observation matches the exact amount
+    if (!matchedObs) {
+      matchedObs = ctx.obsRepo.db.queryOne(`
+        SELECT * FROM payment_observations
+        WHERE raw_text LIKE ?
+        ORDER BY observed_at DESC LIMIT 1
+      `, [`%${cleanUtr}%`]);
+    }
+
     if (!matchedObs && session.amountPaise) {
+      const unattributed = ctx.obsRepo.findUnattributed(session.receivingAccountId);
       matchedObs = unattributed.find(o => o.amountPaise === session.amountPaise);
     }
 
     if (matchedObs) {
-      const matchResult = ctx.attributionEngine.processObservation(matchedObs);
-      if (matchResult && (matchResult.attributed || matchResult.outcomeStatus === PaymentStatus.SUCCESS)) {
-        server.broadcastSse(session.id, 'status_change', {
-          status: PaymentStatus.SUCCESS,
-          utr: cleanUtr
+      const obsAmountPaise = BigInt(matchedObs.amount_paise || matchedObs.amountPaise || 0);
+
+      // Check for Partial Payment (User paid less than required order amount)
+      if (obsAmountPaise < session.amountPaise && obsAmountPaise > 0n) {
+        const paidPaise = obsAmountPaise;
+        const remainingPaise = session.amountPaise - paidPaise;
+        const paidRupees = (Number(paidPaise) / 100).toFixed(2);
+        const remainingRupees = (Number(remainingPaise) / 100).toFixed(2);
+
+        ctx.sessionRepo.updateMetadata(session.id, {
+          partiallyPaid: true,
+          amountPaidPaise: Number(paidPaise),
+          remainingAmountPaise: Number(remainingPaise),
+          amountPaid: paidRupees,
+          remainingAmount: remainingRupees,
+          attributedUtr: cleanUtr
         });
+
+        ctx.sessionRepo.db.run(`
+          UPDATE payment_sessions
+          SET status = 'PARTIALLY_PAID', updated_at = datetime('now')
+          WHERE id = ?
+        `, [session.id]);
+
+        ctx.obsRepo.markAttributed(matchedObs.id, session.id);
+
+        server.broadcastSse(session.id, 'status_change', {
+          status: 'PARTIALLY_PAID',
+          partiallyPaid: true,
+          amountPaid: paidRupees,
+          remainingAmount: remainingRupees,
+          utr: cleanUtr,
+          message: `Partially paid: ₹${paidRupees} received. Remaining balance: ₹${remainingRupees}`
+        });
+
         HttpServer.json(res, 200, {
-          status: PaymentStatus.SUCCESS,
-          message: 'Payment verified successfully!',
+          status: 'PARTIALLY_PAID',
+          partiallyPaid: true,
+          amountPaid: paidRupees,
+          remainingAmount: remainingRupees,
+          message: `Partially paid: ₹${paidRupees} received. Remaining balance: ₹${remainingRupees}`,
           utr: cleanUtr
         });
         return;
       }
+
+      // Full Payment Match
+      ctx.sessionRepo.updateMetadata(session.id, {
+        attributedUtr: cleanUtr
+      });
+      ctx.obsRepo.markAttributed(matchedObs.id, session.id);
+      if (ctx.timingEngine) {
+        ctx.timingEngine.clearTimers(session.id);
+      }
+      ctx.sessionRepo.transitionToTerminal(session.id, PaymentStatus.SUCCESS, {
+        attributedObservationId: matchedObs.id
+      });
+      if (ctx.queueEngine && session.receivingAccountId) {
+        ctx.queueEngine.promoteNext(session.receivingAccountId, ctx.timingEngine.activeDurationMs);
+      }
+      ctx.eventEmitter.emit('PAYMENT.SUCCESS', {
+        paymentId: session.id,
+        orderId: session.orderId,
+        merchantId: session.merchantId,
+        amountPaise: session.amountPaise,
+        observationId: matchedObs.id,
+        verificationLevel: 1,
+        verificationTag: 'L1',
+        sources: [matchedObs.source]
+      });
+
+      server.broadcastSse(session.id, 'status_change', {
+        status: PaymentStatus.SUCCESS,
+        utr: cleanUtr
+      });
+      HttpServer.json(res, 200, {
+        status: PaymentStatus.SUCCESS,
+        message: 'Payment verified successfully!',
+        utr: cleanUtr
+      });
+      return;
     }
+
+    // Trigger immediate sweep on Gmail observer to fetch new credit notification instantly
+    const gmailPort = process.env.GMAIL_OBSERVER_PORT || 6003;
+    fetch(`http://127.0.0.1:${gmailPort}/api/sweep`, {
+      method: 'POST',
+      signal: AbortSignal.timeout(1500)
+    }).catch(() => {});
 
     // 3. Move session to PROCESSING with verification timer so observer matches it
     if (session.status === PaymentStatus.ACTIVE) {

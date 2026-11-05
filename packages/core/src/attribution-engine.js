@@ -166,6 +166,23 @@ export class AttributionEngine {
         currentSession = this.sessionRepo.mapRow(matchRow);
       }
     }
+    // Check if any ACTIVE, PROCESSING, or PARTIALLY_PAID session explicitly submitted this UTR
+    if (!currentSession && normalizedObs.bankReferenceNumber) {
+      const cleanUtr = String(normalizedObs.bankReferenceNumber).trim().toUpperCase();
+      const utrMatch = this.sessionRepo.db.queryOne(`
+        SELECT * FROM payment_sessions
+        WHERE status IN ('ACTIVE', 'PROCESSING', 'PARTIALLY_PAID')
+          AND (
+            json_extract(metadata, '$.submittedUtr') = ?
+            OR UPPER(json_extract(metadata, '$.submittedUtr')) = ?
+          )
+        ORDER BY created_at DESC LIMIT 1
+      `, [normalizedObs.bankReferenceNumber, cleanUtr]);
+      if (utrMatch) {
+        currentSession = this.sessionRepo.mapRow(utrMatch);
+      }
+    }
+
     if (!currentSession) {
       // Fallback: Check if there is an ACTIVE or PROCESSING session matching this exact amount anywhere on the gateway
       const anyActive = this.sessionRepo.db.queryOne(`
@@ -180,11 +197,68 @@ export class AttributionEngine {
     }
 
     if (currentSession) {
-      // Invariant Check 1: Must be in ACTIVE or PROCESSING status
-      const isEligibleStatus = [PaymentStatus.ACTIVE, PaymentStatus.PROCESSING].includes(currentSession.status);
+      // Invariant Check 1: Must be in ACTIVE, PROCESSING, or PARTIALLY_PAID status
+      const isEligibleStatus = [PaymentStatus.ACTIVE, PaymentStatus.PROCESSING, 'PARTIALLY_PAID'].includes(currentSession.status);
 
-      // Invariant Check 2: Exact Amount Match (in integer paise)
-      const isAmountMatch = currentSession.amountPaise === normalizedObs.amountPaise;
+      // Check for Partial Payment (User paid less than required order amount)
+      if (isEligibleStatus && normalizedObs.amountPaise < currentSession.amountPaise) {
+        const isUtrMatch = normalizedObs.bankReferenceNumber && (
+          currentSession.metadata?.submittedUtr === normalizedObs.bankReferenceNumber ||
+          currentSession.metadata?.submittedUtr?.toUpperCase() === normalizedObs.bankReferenceNumber.toUpperCase()
+        );
+
+        if (isUtrMatch || currentSession.receivingAccountId === normalizedObs.receivingAccountId) {
+          const paidPaise = normalizedObs.amountPaise;
+          const remainingPaise = currentSession.amountPaise - paidPaise;
+          const paidRupees = (Number(paidPaise) / 100).toFixed(2);
+          const remainingRupees = (Number(remainingPaise) / 100).toFixed(2);
+
+          this.sessionRepo.updateMetadata(currentSession.id, {
+            partiallyPaid: true,
+            amountPaidPaise: Number(paidPaise),
+            remainingAmountPaise: Number(remainingPaise),
+            amountPaid: paidRupees,
+            remainingAmount: remainingRupees,
+            attributedUtr: normalizedObs.bankReferenceNumber || currentSession.metadata?.submittedUtr || null
+          });
+
+          this.sessionRepo.db.run(`
+            UPDATE payment_sessions
+            SET status = 'PARTIALLY_PAID', updated_at = datetime('now')
+            WHERE id = ?
+          `, [currentSession.id]);
+
+          this.obsRepo.markAttributed(savedObs.id, currentSession.id);
+
+          this.eventEmitter.emit('PAYMENT.PARTIALLY_PAID', {
+            paymentId: currentSession.id,
+            orderId: currentSession.orderId,
+            merchantId: currentSession.merchantId,
+            amountPaise: currentSession.amountPaise,
+            paidPaise,
+            remainingPaise,
+            paidRupees,
+            remainingRupees,
+            utr: normalizedObs.bankReferenceNumber,
+            observationId: savedObs.id
+          });
+
+          return {
+            attributed: true,
+            duplicate: false,
+            lateMatch: false,
+            partiallyPaid: true,
+            paymentSessionId: currentSession.id,
+            observationId: savedObs.id,
+            outcomeStatus: 'PARTIALLY_PAID',
+            amountPaid: paidRupees,
+            remainingAmount: remainingRupees
+          };
+        }
+      }
+
+      // Invariant Check 2: Exact Amount Match (in integer paise) or Full Payment
+      const isAmountMatch = normalizedObs.amountPaise >= currentSession.amountPaise;
 
       // Invariant Check 3: Temporal Window (with 5-minute clock skew tolerance, strictly preventing hijacking of prior expired sessions)
       let isPriorExpiredSession = false;
