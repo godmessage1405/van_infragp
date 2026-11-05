@@ -98,6 +98,7 @@ CREATE TABLE IF NOT EXISTS payment_sessions (
     CONSTRAINT uq_merchant_order UNIQUE (merchant_id, order_id)
 );
 
+CREATE INDEX IF NOT EXISTS idx_payment_sessions_utr ON payment_sessions (utr);
 CREATE INDEX IF NOT EXISTS idx_payment_sessions_active ON payment_sessions (receiving_account_id, status);
 
 -- 5. Payment Observations Table

@@ -147,6 +147,66 @@ export class AttributionEngine {
     // Persist new observation as UNATTRIBUTED first
     const savedObs = this.obsRepo.create(normalizedObs);
 
+    // Guard 1: Calendar Date Check (Only today's incoming bank alerts can confirm active payments)
+    const obsDate = new Date(normalizedObs.observedAt || Date.now());
+    const obsIstDate = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' }).format(obsDate);
+    const todayIstDate = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' }).format(new Date());
+
+    if (obsIstDate !== todayIstDate) {
+      if (this.auditRepo) {
+        this.auditRepo.log({
+          entityType: 'PAYMENT_OBSERVATION',
+          entityId: savedObs.id,
+          action: 'OLD_OBSERVATION_DROPPED',
+          actorType: 'SYSTEM',
+          details: { obsIstDate, todayIstDate }
+        });
+      }
+      return {
+        attributed: false,
+        duplicate: false,
+        lateMatch: false,
+        observationId: savedObs.id,
+        outcomeStatus: 'DATE_EXPIRED'
+      };
+    }
+
+    // Guard 2: Anti-Replay UTR Protection (Ensure UTR was not previously attributed to another completed session)
+    if (normalizedObs.bankReferenceNumber) {
+      const cleanUtr = String(normalizedObs.bankReferenceNumber).trim().toUpperCase();
+      const existingSuccess = this.sessionRepo.db.queryOne(`
+        SELECT id, order_id, status FROM payment_sessions
+        WHERE (
+          utr = ? OR UPPER(utr) = ?
+          OR json_extract(metadata, '$.attributedUtr') = ?
+          OR UPPER(json_extract(metadata, '$.attributedUtr')) = ?
+        ) AND status = 'SUCCESS'
+        LIMIT 1
+      `, [normalizedObs.bankReferenceNumber, cleanUtr, normalizedObs.bankReferenceNumber, cleanUtr]);
+
+      if (existingSuccess) {
+        const targetId = normalizedObs.rawPayload?.targetSessionId;
+        if (!targetId || targetId !== existingSuccess.id) {
+          if (this.auditRepo) {
+            this.auditRepo.log({
+              entityType: 'PAYMENT_OBSERVATION',
+              entityId: savedObs.id,
+              action: 'REPLAY_UTR_BLOCKED',
+              actorType: 'SYSTEM',
+              details: { utr: cleanUtr, existingSessionId: existingSuccess.id }
+            });
+          }
+          return {
+            attributed: false,
+            duplicate: true,
+            lateMatch: false,
+            observationId: savedObs.id,
+            outcomeStatus: 'REPLAY_BLOCKED'
+          };
+        }
+      }
+    }
+
     // Tier 2: Check currently active session on receiving account
     let currentSession = null;
     if (normalizedObs.rawPayload?.targetSessionId) {
@@ -224,9 +284,9 @@ export class AttributionEngine {
 
           this.sessionRepo.db.run(`
             UPDATE payment_sessions
-            SET status = 'PARTIALLY_PAID', updated_at = datetime('now')
+            SET status = 'PARTIALLY_PAID', utr = COALESCE(?, utr), updated_at = datetime('now')
             WHERE id = ?
-          `, [currentSession.id]);
+          `, [normalizedObs.bankReferenceNumber, currentSession.id]);
 
           this.obsRepo.markAttributed(savedObs.id, currentSession.id);
 
@@ -291,7 +351,7 @@ export class AttributionEngine {
             currentSession.id,
             normalizedObs.source,
             savedObs.id,
-            { finalizeSuccess: true }
+            { finalizeSuccess: true, utr: normalizedObs.bankReferenceNumber }
           );
           this.obsRepo.markAttributed(savedObs.id, currentSession.id);
 
@@ -351,7 +411,7 @@ export class AttributionEngine {
           currentSession.id,
           normalizedObs.source,
           savedObs.id,
-          { finalizeSuccess: false }
+          { finalizeSuccess: false, utr: normalizedObs.bankReferenceNumber }
         );
 
         this.obsRepo.markAttributed(savedObs.id, currentSession.id);
@@ -391,7 +451,7 @@ export class AttributionEngine {
             currentSession.id,
             normalizedObs.source,
             savedObs.id,
-            { finalizeSuccess: true }
+            { finalizeSuccess: true, utr: normalizedObs.bankReferenceNumber }
           );
           this.eventEmitter.emit('PAYMENT.SUCCESS', {
             paymentId: currentSession.id,

@@ -231,6 +231,7 @@ export function registerAdminRoutes(server, ctx) {
         currency: p.currency,
         method: p.method,
         status: p.status,
+        utr: p.utr || p.metadata?.attributedUtr || p.metadata?.submittedUtr || null,
         verificationLevel: p.verificationLevel || 0,
         verificationSources: p.verificationSources || [],
         verificationTag: p.verificationTag || 'UNVERIFIED',

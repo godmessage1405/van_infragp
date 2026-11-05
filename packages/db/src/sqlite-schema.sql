@@ -85,6 +85,7 @@ CREATE TABLE IF NOT EXISTS payment_sessions (
     completed_at TEXT,
     return_url TEXT,
     attributed_observation_id TEXT,
+    utr TEXT,
     idempotency_key TEXT,
     device_id TEXT REFERENCES devices(id),
     verification_level INTEGER DEFAULT 0,
@@ -96,6 +97,7 @@ CREATE TABLE IF NOT EXISTS payment_sessions (
     UNIQUE(merchant_id, order_id)
 );
 
+CREATE INDEX IF NOT EXISTS idx_payment_sessions_utr ON payment_sessions (utr);
 CREATE INDEX IF NOT EXISTS idx_payment_sessions_active ON payment_sessions (receiving_account_id, status);
 
 -- 5. Payment Observations Table

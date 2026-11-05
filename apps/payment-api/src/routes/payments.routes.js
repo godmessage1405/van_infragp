@@ -303,6 +303,7 @@ export function registerPaymentRoutes(server, ctx) {
       status: publicStatus,
       internalStatus: session.status,
       method: session.method,
+      utr: session.utr || session.metadata?.attributedUtr || session.metadata?.submittedUtr || null,
       verificationLevel: session.verificationLevel || 0,
       verificationSources: session.verificationSources || [],
       verificationTag: session.verificationTag || 'UNVERIFIED',

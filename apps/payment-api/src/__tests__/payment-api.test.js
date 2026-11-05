@@ -864,8 +864,70 @@ describe('Payment API End-to-End HTTP Integration Tests', () => {
     assert.equal(utrFullRes.status, 200);
     assert.equal(utrFullRes.body.status, 'SUCCESS');
 
-    // Checkout state reflects SUCCESS
+    // Checkout state reflects SUCCESS and stores UTR
     const stateFull = await request('/api/v1/checkout/' + paymentId + '/state');
     assert.equal(stateFull.body.status, 'SUCCESS');
+    assert.equal(stateFull.body.utr, '530999888222');
+
+    // Public payment details API returns UTR
+    const payDetails = await request('/api/v1/payments/' + paymentId);
+    assert.equal(payDetails.status, 200);
+    assert.equal(payDetails.body.utr, '530999888222');
+
+    // Admin Transactions Ledger returns UTR
+    const adminLedger = await request('/api/v1/admin/payments');
+    assert.equal(adminLedger.status, 200);
+    const foundInLedger = adminLedger.body.payments.find(p => p.id === paymentId);
+    assert.ok(foundInLedger);
+    assert.equal(foundInLedger.utr, '530999888222');
+
+    // 4. Anti-Replay Guard Test: Re-using the same UTR on a new order MUST FAIL
+    const payReplay = await request('/api/v1/payments', {
+      method: 'POST',
+      body: {
+        orderId: 'UTR-REPLAY-TEST-001',
+        amount: '500.00',
+        currency: 'INR',
+        autoActivate: true
+      }
+    });
+    assert.equal(payReplay.status, 201);
+    const replayRes = await request('/api/v1/checkout/' + payReplay.body.paymentId + '/submit-utr', {
+      method: 'POST',
+      body: { utr: '530999888222' }
+    });
+    assert.equal(replayRes.status, 400);
+    assert.equal(replayRes.body.code, 'DUPLICATE_UTR_REPLAY');
+
+    // 5. Today's Date Guard Test: UTR from a previous date MUST BE REJECTED
+    const payOld = await request('/api/v1/payments', {
+      method: 'POST',
+      body: {
+        orderId: 'UTR-OLD-DATE-TEST-002',
+        amount: '350.00',
+        currency: 'INR',
+        autoActivate: true
+      }
+    });
+    assert.equal(payOld.status, 201);
+
+    const oldDateIso = new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString();
+    await request('/api/v1/pollers/events', {
+      method: 'POST',
+      body: {
+        source: 'GMAIL',
+        receivingAccountId: '00000000-0000-0000-0000-000000000002',
+        amount: '350.00',
+        utr: '999888777111',
+        observedAt: oldDateIso
+      }
+    });
+
+    const oldDateRes = await request('/api/v1/checkout/' + payOld.body.paymentId + '/submit-utr', {
+      method: 'POST',
+      body: { utr: '999888777111' }
+    });
+    assert.equal(oldDateRes.status, 400);
+    assert.equal(oldDateRes.body.code, 'OBSERVATION_NOT_TODAY');
   });
 });

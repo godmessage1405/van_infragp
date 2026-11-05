@@ -59,6 +59,8 @@ export function runMigrations(targetDb) {
   try { db.exec("ALTER TABLE payment_sessions ADD COLUMN verification_level INTEGER DEFAULT 0;"); } catch {}
   try { db.exec("ALTER TABLE payment_sessions ADD COLUMN verification_sources TEXT DEFAULT '[]';"); } catch {}
   try { db.exec("ALTER TABLE payment_sessions ADD COLUMN verification_tag TEXT DEFAULT 'UNVERIFIED';"); } catch {}
+  try { db.exec("ALTER TABLE payment_sessions ADD COLUMN utr TEXT;"); } catch {}
+  try { db.exec("CREATE INDEX IF NOT EXISTS idx_payment_sessions_utr ON payment_sessions (utr);"); } catch {}
 
   // Execute schema DDL
   db.exec(schemaSql);

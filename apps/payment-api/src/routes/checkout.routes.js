@@ -367,6 +367,8 @@ export function registerCheckoutRoutes(server, ctx) {
         amountPaise: session.amountPaise.toString(),
         currency: session.currency,
         status: session.status,
+        utr: session.utr || session.metadata?.attributedUtr || session.metadata?.submittedUtr || null,
+        completedAt: session.completedAt ? session.completedAt.toISOString() : null,
         timeRemainingSeconds: 0,
         isTerminal: true,
         branding
@@ -564,6 +566,7 @@ export function registerCheckoutRoutes(server, ctx) {
       partiallyPaid: session.status === 'PARTIALLY_PAID' || Boolean(session.metadata?.partiallyPaid),
       amountPaid: session.metadata?.amountPaid || null,
       remainingAmount: session.metadata?.remainingAmount || null,
+      utr: session.utr || session.metadata?.attributedUtr || session.metadata?.submittedUtr || null,
       reason: session.metadata?.cancelledReason || null,
       cancelledReason: session.metadata?.cancelledReason || null,
       metadata: session.metadata || {},
@@ -957,11 +960,57 @@ export function registerCheckoutRoutes(server, ctx) {
       return;
     }
 
-    // 1. Record submitted UTR in metadata
+    // 1. ANTI-REPLAY GUARD: Check if this UTR has already been used for another completed payment
+    const existingUsed = ctx.sessionRepo.db.queryOne(`
+      SELECT id, order_id, status FROM payment_sessions
+      WHERE id != ?
+        AND (
+          utr = ? 
+          OR UPPER(utr) = ?
+          OR json_extract(metadata, '$.attributedUtr') = ?
+          OR UPPER(json_extract(metadata, '$.attributedUtr')) = ?
+          OR (json_extract(metadata, '$.submittedUtr') = ? AND status IN ('SUCCESS', 'PARTIALLY_PAID'))
+        )
+        AND status IN ('SUCCESS', 'PARTIALLY_PAID')
+      LIMIT 1
+    `, [session.id, cleanUtr, cleanUtr.toUpperCase(), cleanUtr, cleanUtr.toUpperCase(), cleanUtr]);
+
+    if (existingUsed) {
+      HttpServer.json(res, 400, {
+        error: 'This UTR has already been used for another completed payment. Replay or duplicate UTRs are strictly rejected.',
+        code: 'DUPLICATE_UTR_REPLAY'
+      });
+      return;
+    }
+
+    // Check if any observation with this UTR has already been attributed to another session
+    const alreadyAttributedObs = ctx.obsRepo.db.queryOne(`
+      SELECT id, attributed_payment_id FROM payment_observations
+      WHERE (bank_reference_number = ? OR UPPER(bank_reference_number) = ? OR raw_payload LIKE ?)
+        AND attribution_status = 'ATTRIBUTED'
+        AND attributed_payment_id IS NOT NULL
+        AND attributed_payment_id != ?
+      LIMIT 1
+    `, [cleanUtr, cleanUtr.toUpperCase(), `%${cleanUtr}%`, session.id]);
+
+    if (alreadyAttributedObs) {
+      HttpServer.json(res, 400, {
+        error: 'This transaction reference (UTR) is already attributed to another payment.',
+        code: 'DUPLICATE_OBSERVATION_REPLAY'
+      });
+      return;
+    }
+
+    // 2. Record submitted UTR in metadata and session
     ctx.sessionRepo.updateMetadata(session.id, {
       submittedUtr: cleanUtr,
       utrSubmittedAt: new Date().toISOString()
     });
+    try {
+      ctx.sessionRepo.db.run(`
+        UPDATE payment_sessions SET utr = COALESCE(utr, ?), updated_at = datetime('now') WHERE id = ?
+      `, [cleanUtr, session.id]);
+    } catch {}
 
     // 2. Check if an observation matching this UTR or amount already exists in DB
     let matchedObs = ctx.obsRepo.db.queryOne(`
@@ -973,7 +1022,7 @@ export function registerCheckoutRoutes(server, ctx) {
     if (!matchedObs) {
       matchedObs = ctx.obsRepo.db.queryOne(`
         SELECT * FROM payment_observations
-        WHERE raw_text LIKE ?
+        WHERE raw_payload LIKE ?
         ORDER BY observed_at DESC LIMIT 1
       `, [`%${cleanUtr}%`]);
     }
@@ -984,6 +1033,19 @@ export function registerCheckoutRoutes(server, ctx) {
     }
 
     if (matchedObs) {
+      // 3. TODAY'S DATE GUARD: Only today's banking emails/alerts can confirm payment
+      const obsDate = new Date(matchedObs.observed_at || matchedObs.observedAt || matchedObs.ingested_at || Date.now());
+      const obsDateStr = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' }).format(obsDate);
+      const todayDateStr = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' }).format(new Date());
+
+      if (obsDateStr !== todayDateStr) {
+        HttpServer.json(res, 400, {
+          error: `Payment confirmation rejected: This transaction was observed on ${obsDateStr}. Only payments received today (${todayDateStr}) can be confirmed.`,
+          code: 'OBSERVATION_NOT_TODAY'
+        });
+        return;
+      }
+
       const obsAmountPaise = BigInt(matchedObs.amount_paise || matchedObs.amountPaise || 0);
 
       // Check for Partial Payment (User paid less than required order amount)
@@ -1004,9 +1066,9 @@ export function registerCheckoutRoutes(server, ctx) {
 
         ctx.sessionRepo.db.run(`
           UPDATE payment_sessions
-          SET status = 'PARTIALLY_PAID', updated_at = datetime('now')
+          SET status = 'PARTIALLY_PAID', utr = ?, updated_at = datetime('now')
           WHERE id = ?
-        `, [session.id]);
+        `, [cleanUtr, session.id]);
 
         ctx.obsRepo.markAttributed(matchedObs.id, session.id);
 
@@ -1039,8 +1101,12 @@ export function registerCheckoutRoutes(server, ctx) {
         ctx.timingEngine.clearTimers(session.id);
       }
       ctx.sessionRepo.transitionToTerminal(session.id, PaymentStatus.SUCCESS, {
-        attributedObservationId: matchedObs.id
+        attributedObservationId: matchedObs.id,
+        utr: cleanUtr
       });
+      try {
+        ctx.sessionRepo.db.run(`UPDATE payment_sessions SET utr = ? WHERE id = ?`, [cleanUtr, session.id]);
+      } catch {}
       if (ctx.queueEngine && session.receivingAccountId) {
         ctx.queueEngine.promoteNext(session.receivingAccountId, ctx.timingEngine.activeDurationMs);
       }

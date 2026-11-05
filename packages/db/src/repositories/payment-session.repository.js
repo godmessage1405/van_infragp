@@ -224,6 +224,7 @@ export class PaymentSessionRepository {
 
       const now = new Date().toISOString();
       const attributedObsId = options.attributedObservationId || session.attributedObservationId || null;
+      const utr = options.utr || options.bankReferenceNumber || null;
 
       let metadata = session.metadata || {};
       if (typeof metadata === 'string') {
