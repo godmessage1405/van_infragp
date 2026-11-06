@@ -354,7 +354,8 @@
       padding: 6px 16px;
       display: flex;
       align-items: center;
-      gap: 6px;
+      justify-content: space-between;
+      gap: 8px;
       font-size: 11.5px;
       font-weight: 500;
       color: #ffffff;
@@ -971,8 +972,17 @@
     }
 
     @keyframes ypg-pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.55; transform: scale(1.12); }
+
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      50% {
+        opacity: 0.55;
+        transform: scale(1.12);
+      }
     }
 
     .ypg-pulse {
@@ -1309,6 +1319,7 @@
       position: relative;
       overflow: hidden;
     }
+
     .ypg-blocked-box::before {
       content: '';
       position: absolute;
@@ -1318,6 +1329,7 @@
       height: 4px;
       background: linear-gradient(90deg, #dc2626, #b91c1c, #991b1b);
     }
+
     .ypg-blocked-icon-wrap {
       width: 72px;
       height: 72px;
@@ -1332,10 +1344,21 @@
       box-shadow: 0 8px 24px rgba(220, 38, 38, 0.16);
       animation: ypgPulseAlert 2s infinite ease-in-out;
     }
+
     @keyframes ypgPulseAlert {
-      0%, 100% { transform: scale(1); box-shadow: 0 8px 24px rgba(220, 38, 38, 0.16); }
-      50% { transform: scale(1.05); box-shadow: 0 12px 30px rgba(220, 38, 38, 0.28); }
+
+      0%,
+      100% {
+        transform: scale(1);
+        box-shadow: 0 8px 24px rgba(220, 38, 38, 0.16);
+      }
+
+      50% {
+        transform: scale(1.05);
+        box-shadow: 0 12px 30px rgba(220, 38, 38, 0.28);
+      }
     }
+
     .ypg-blocked-badge {
       display: inline-flex;
       align-items: center;
@@ -1351,6 +1374,7 @@
       border-radius: 20px;
       margin-bottom: 10px;
     }
+
     .ypg-blocked-badge-dot {
       width: 7px;
       height: 7px;
@@ -1359,6 +1383,7 @@
       box-shadow: 0 0 6px #dc2626;
       animation: rzpHaloPulse 1.2s infinite;
     }
+
     .ypg-blocked-title {
       font-size: 20px;
       font-weight: 800;
@@ -1366,12 +1391,14 @@
       margin-bottom: 6px;
       letter-spacing: -0.01em;
     }
+
     .ypg-blocked-subtitle {
       font-size: 13px;
       font-weight: 600;
       color: #475569;
       margin-bottom: 14px;
     }
+
     .ypg-blocked-card {
       background: #f8fafc;
       border: 1px solid #e2e8f0;
@@ -1382,12 +1409,14 @@
       max-width: 340px;
       text-align: left;
     }
+
     .ypg-blocked-desc {
       font-size: 12px;
       color: #334155;
       line-height: 1.55;
       margin: 0;
     }
+
     .ypg-blocked-investigation {
       margin-top: 10px;
       padding-top: 10px;
@@ -1399,6 +1428,7 @@
       color: #64748b;
       line-height: 1.45;
     }
+
     .ypg-blocked-details {
       background: #0f172a;
       border-radius: 8px;
@@ -1412,9 +1442,11 @@
       font-size: 11px;
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     }
+
     .ypg-blocked-details-label {
       color: #94a3b8;
     }
+
     .ypg-blocked-details-val {
       color: #f8fafc;
       text-align: right;
@@ -1422,6 +1454,7 @@
       text-overflow: ellipsis;
       white-space: nowrap;
     }
+
     .ypg-btn-blocked-exit {
       background: #0f172a;
       color: #ffffff;
@@ -1439,6 +1472,7 @@
       gap: 6px;
       transition: all 0.2s;
     }
+
     .ypg-btn-blocked-exit:hover {
       background: #1e293b;
     }
@@ -1455,6 +1489,7 @@
       box-sizing: border-box;
       position: relative;
     }
+
     .ypg-duplicate-badge {
       display: inline-flex;
       align-items: center;
@@ -1470,6 +1505,7 @@
       letter-spacing: 0.05em;
       margin-bottom: 16px;
     }
+
     .ypg-duplicate-badge-dot {
       width: 7px;
       height: 7px;
@@ -1478,6 +1514,7 @@
       box-shadow: 0 0 6px #d97706;
       animation: rzpHaloPulse 1.2s infinite;
     }
+
     .ypg-duplicate-icon-wrap {
       width: 64px;
       height: 64px;
@@ -1491,6 +1528,7 @@
       margin-bottom: 14px;
       box-shadow: 0 4px 16px rgba(217, 119, 6, 0.15);
     }
+
     .ypg-duplicate-title {
       font-size: 20px;
       font-weight: 800;
@@ -1498,12 +1536,14 @@
       margin-bottom: 6px;
       letter-spacing: -0.01em;
     }
+
     .ypg-duplicate-subtitle {
       font-size: 13px;
       font-weight: 600;
       color: #64748b;
       margin-bottom: 16px;
     }
+
     .ypg-duplicate-card {
       background: #fffbeb;
       border: 1px solid #fef08a;
@@ -1514,6 +1554,7 @@
       max-width: 360px;
       text-align: center;
     }
+
     .ypg-duplicate-desc {
       font-size: 13px;
       color: #1e293b;
@@ -1521,6 +1562,7 @@
       margin: 0;
       font-weight: 500;
     }
+
     .ypg-btn-duplicate-action {
       background: #0f172a;
       color: #ffffff;
@@ -1538,11 +1580,13 @@
       justify-content: center;
       letter-spacing: 0.02em;
     }
+
     .ypg-btn-duplicate-action:hover {
       background: #1e293b;
       transform: translateY(-1px);
       box-shadow: 0 6px 16px rgba(15, 23, 42, 0.25);
     }
+
     .ypg-btn-duplicate-action:active {
       transform: translateY(0);
     }
@@ -3047,7 +3091,9 @@
 <body>
 
   <!-- TOAST NOTIFICATION -->
-  <div id="ypgToast" class="ypg-toast"><img src="/icons/upi.svg" alt="UPI" style="height:12px; vertical-align:middle; filter:brightness(0) invert(1); margin-right:4px;" /> Direct UPI QR is active for instant banking verification</div>
+  <div id="ypgToast" class="ypg-toast"><img src="/icons/upi.svg" alt="UPI"
+      style="height:12px; vertical-align:middle; filter:brightness(0) invert(1); margin-right:4px;" /> Direct UPI QR is
+    active for instant banking verification</div>
 
   <!-- YOUPI PG CHECKOUT CARD / DRAWER WRAPPER -->
   <div class="ypg-wrapper">
@@ -3059,7 +3105,8 @@
           <img id="splashBrandLogo" alt="Logo"
             style="display:none; max-width:82px; max-height:82px; border-radius:16px; object-fit:contain; box-shadow:0 8px 24px rgba(0,0,0,0.12);" />
           <!-- Infravan Signature Cloud Node Core Icon -->
-          <svg class="ypg-shield-icon-svg" id="splashDefaultShield" viewBox="0 0 32 32" fill="none" style="width:76px; height:76px;">
+          <svg class="ypg-shield-icon-svg" id="splashDefaultShield" viewBox="0 0 32 32" fill="none"
+            style="width:76px; height:76px;">
             <defs>
               <linearGradient id="infravan-bg" x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stop-color="#0e1728" />
@@ -3073,7 +3120,8 @@
                 <feDropShadow dx="0" dy="1" stdDeviation="1.5" flood-color="#fe932c" flood-opacity="0.4" />
               </filter>
             </defs>
-            <rect x="2" y="2" width="28" height="28" rx="7" fill="url(#infravan-bg)" stroke="#fe932c" stroke-width="1.2" stroke-opacity="0.35" />
+            <rect x="2" y="2" width="28" height="28" rx="7" fill="url(#infravan-bg)" stroke="#fe932c" stroke-width="1.2"
+              stroke-opacity="0.35" />
             <rect x="9.5" y="9.5" width="13" height="13" rx="3" fill="url(#infravan-core)" filter="url(#core-glow)" />
           </svg>
           <div class="ypg-orbit-dot" style="background:#fe932c; box-shadow:0 0 10px #fe932c;"></div>
@@ -3081,7 +3129,8 @@
       </div>
       <div class="ypg-splash-footer" id="splashFooterWrap">
         <span>Secured By</span>
-        <strong id="splashSecuredByText" style="color:var(--ypg-blue); font-size:15px; letter-spacing:-0.2px;">Infravan PG</strong>
+        <strong id="splashSecuredByText" style="color:var(--ypg-blue); font-size:15px; letter-spacing:-0.2px;">Infravan
+          PG</strong>
       </div>
     </div>
 
@@ -3167,13 +3216,23 @@
       <!-- PC TOPBAR -->
       <div class="ypg-pc-topbar">
         <div class="ypg-pc-topbar-title">Payment Options</div>
-        <div class="ypg-pc-topbar-actions" style="position: relative;">
-          <button type="button" class="ypg-pc-btn-more" id="btnPcMore" onclick="toggleAccountMenu(event)" title="Options">•••</button>
+        <div class="ypg-pc-topbar-actions" style="position: relative; display: flex; align-items: center; gap: 8px;">
+          <div class="ypg-countdown-pill" id="activeTimerBadgePc"
+            style="margin: 0; display: inline-flex; align-items: center; gap: 4px; background: #f1f5f9; border: 1px solid #e2e8f0; font-size: 11px; padding: 2px 8px; border-radius: 9999px;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <circle cx="12" cy="12" r="10" />
+              <polyline points="12 6 12 12 16 14" />
+            </svg>
+            <span id="activeTimerTextPc">05:00</span>
+          </div>
+          <button type="button" class="ypg-pc-btn-more" id="btnPcMore" onclick="toggleAccountMenu(event)"
+            title="Options">•••</button>
           <button type="button" class="ypg-pc-btn-close" onclick="openCancelPaymentModal()"
             title="Close Checkout">✕</button>
 
           <!-- PC Account Popover Menu -->
-          <div class="ypg-account-popover" id="accountMenuPopoverPc" hidden style="position: absolute; top: 40px; right: 0; background: #ffffff; color: var(--ypg-text-dark); border-radius: 12px; box-shadow: 0 12px 35px rgba(0, 0, 0, 0.18); border: 1px solid var(--ypg-border); padding: 8px; z-index: 1000; min-width: 220px;">
+          <div class="ypg-account-popover" id="accountMenuPopoverPc" hidden
+            style="position: absolute; top: 40px; right: 0; background: #ffffff; color: var(--ypg-text-dark); border-radius: 12px; box-shadow: 0 12px 35px rgba(0, 0, 0, 0.18); border: 1px solid var(--ypg-border); padding: 8px; z-index: 1000; min-width: 220px;">
             <div class="popoverCustomerName" id="popoverCustomerNamePc"
               style="padding:6px 10px 8px 10px; font-weight:700; font-size:12px; border-bottom:1px solid #f1f5f9; color:#0f172a; word-break:break-word;">
               Guest User</div>
@@ -3237,13 +3296,24 @@
 
         <!-- Header Sub-banner -->
         <div class="ypg-header-subbanner" id="headerSubbanner">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-            stroke-linejoin="round">
-            <circle cx="9" cy="21" r="1" />
-            <circle cx="20" cy="21" r="1" />
-            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
-          </svg>
-          <span id="subbannerText">200+ orders verified this month by Infravan PG</span>
+          <div style="display: flex; align-items: center; gap: 6px; min-width: 0; overflow: hidden;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round">
+              <circle cx="9" cy="21" r="1" />
+              <circle cx="20" cy="21" r="1" />
+              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+            </svg>
+            <span id="subbannerText" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Verified &amp; Protected by Infravan</span>
+          </div>
+
+          <div class="ypg-countdown-pill" id="activeTimerBadge"
+            style="margin: 0; flex-shrink: 0; background: rgba(255, 255, 255, 0.14); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.25); font-size: 11px; padding: 2px 8px; border-radius: 9999px; display: inline-flex; align-items: center; gap: 4px;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <circle cx="12" cy="12" r="10" />
+              <polyline points="12 6 12 12 16 14" />
+            </svg>
+            <span id="activeTimerText">05:00</span>
+          </div>
         </div>
 
         <!-- Account Popover Menu -->
@@ -3352,8 +3422,8 @@
 
               <div class="ypg-input-group">
                 <input type="text" class="ypg-input-control ypg-otp-control" id="authOtpInput" placeholder="••••••"
-                  maxlength="6" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code"
-                  autocorrect="off" autocapitalize="off" spellcheck="false" />
+                  maxlength="6" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" autocorrect="off"
+                  autocapitalize="off" spellcheck="false" />
               </div>
 
               <button type="button" class="ypg-btn-auth-action" id="btnAuthVerifyOtp"
@@ -3379,7 +3449,8 @@
         <div id="paymentGatewayInterface" hidden>
 
           <!-- DYNAMIC PAYMENT METHOD SELECTOR BAR (ONLINE / OFFLINE MODALITY TABS) -->
-          <div id="paymentMethodSelectorBar" class="ypg-method-selector-bar" style="display:{{METHOD_SELECTOR_DISPLAY}};">
+          <div id="paymentMethodSelectorBar" class="ypg-method-selector-bar"
+            style="display:{{METHOD_SELECTOR_DISPLAY}};">
             <button type="button" class="ypg-method-tab active" id="tabMethodUpi" onclick="selectPaymentMethod('UPI')">
               <img src="/icons/upi.svg" alt="UPI" class="ypg-tab-icon" style="height:15px;" />
               <span>UPI QR</span>
@@ -3396,7 +3467,11 @@
             </button>
             <button type="button" class="ypg-method-tab" id="tabMethodCard"
               onclick="selectPaymentMethod('CARD_COUNTER')" style="{{TAB_CARD_STYLE}}">
-              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px; vertical-align:middle;"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"
+                style="margin-right:4px; vertical-align:middle;">
+                <rect x="2" y="5" width="20" height="14" rx="2" />
+                <line x1="2" y1="10" x2="22" y2="10" />
+              </svg>
               <span>Card</span>
             </button>
           </div>
@@ -3425,15 +3500,18 @@
               </div>
 
               <!-- Cash at Till Card (Offline Mode) -->
-              <div class="ypg-pc-method-card" id="pcMethodCardCash" onclick="selectPaymentMethod('CASH_COUNTER')" style="{{PC_CASH_STYLE}}">
+              <div class="ypg-pc-method-card" id="pcMethodCardCash" onclick="selectPaymentMethod('CASH_COUNTER')"
+                style="{{PC_CASH_STYLE}}">
                 <div class="ypg-pc-method-header">
-                  <img src="/icons/cash.svg" alt="Cash" style="width:16px; height:16px; margin-right:6px; vertical-align:middle;" />
+                  <img src="/icons/cash.svg" alt="Cash"
+                    style="width:16px; height:16px; margin-right:6px; vertical-align:middle;" />
                   <div class="ypg-pc-method-title">Cash at Till</div>
                   <span class="ypg-pc-cash-pill">Counter</span>
                 </div>
                 <div class="ypg-pc-method-sub">Pay cash directly to cashier</div>
                 <div class="ypg-pc-method-icons" style="margin-top:6px;">
-                  <span style="font-size:10.5px; font-weight:700; color:#15803d; background:#dcfce7; padding:2px 8px; border-radius:5px; display:inline-flex; align-items:center; gap:4px; border:1px solid #bbf7d0;">
+                  <span
+                    style="font-size:10.5px; font-weight:700; color:#15803d; background:#dcfce7; padding:2px 8px; border-radius:5px; display:inline-flex; align-items:center; gap:4px; border:1px solid #bbf7d0;">
                     <img src="/icons/cash.svg" alt="Cash" style="width:12px; height:12px;" />
                     Physical Cash
                   </span>
@@ -3441,30 +3519,39 @@
               </div>
 
               <!-- Card at Counter (Offline Mode) -->
-              <div class="ypg-pc-method-card" id="pcMethodCardCard" onclick="selectPaymentMethod('CARD_COUNTER')" style="{{PC_CARD_STYLE}}">
+              <div class="ypg-pc-method-card" id="pcMethodCardCard" onclick="selectPaymentMethod('CARD_COUNTER')"
+                style="{{PC_CARD_STYLE}}">
                 <div class="ypg-pc-method-header">
-                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px; vertical-align:middle; color:#475569;"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"
+                    style="margin-right:6px; vertical-align:middle; color:#475569;">
+                    <rect x="2" y="5" width="20" height="14" rx="2" />
+                    <line x1="2" y1="10" x2="22" y2="10" />
+                  </svg>
                   <div class="ypg-pc-method-title">Card at Counter</div>
                   <span class="ypg-pc-cash-pill" style="background:#f1f5f9; color:#475569;">POS</span>
                 </div>
                 <div class="ypg-pc-method-sub">Swipe or tap card at POS desk</div>
                 <div class="ypg-pc-method-icons" style="gap:5px; margin-top:6px; display:flex; align-items:center;">
                   <img src="/icons/visa.svg" alt="Visa" style="height:15px; width:auto; object-fit:contain;" />
-                  <img src="/icons/mastercard.svg" alt="Mastercard" style="height:15px; width:auto; object-fit:contain;" />
+                  <img src="/icons/mastercard.svg" alt="Mastercard"
+                    style="height:15px; width:auto; object-fit:contain;" />
                   <img src="/icons/rupay.svg" alt="RuPay" style="height:15px; width:auto; object-fit:contain;" />
                 </div>
               </div>
 
               <!-- Cash on Delivery (COD) Card (Online Mode) -->
-              <div class="ypg-pc-method-card" id="pcMethodCardCod" onclick="selectPaymentMethod('COD')" style="{{PC_COD_STYLE}}">
+              <div class="ypg-pc-method-card" id="pcMethodCardCod" onclick="selectPaymentMethod('COD')"
+                style="{{PC_COD_STYLE}}">
                 <div class="ypg-pc-method-header">
-                  <img src="/icons/cash.svg" alt="COD" style="width:16px; height:16px; margin-right:6px; vertical-align:middle;" />
+                  <img src="/icons/cash.svg" alt="COD"
+                    style="width:16px; height:16px; margin-right:6px; vertical-align:middle;" />
                   <div class="ypg-pc-method-title">Cash on Delivery</div>
                   <span class="ypg-pc-cash-pill" style="background:#fef3c7; color:#92400e;">COD</span>
                 </div>
                 <div class="ypg-pc-method-sub">Pay physical cash at doorstep</div>
                 <div class="ypg-pc-method-icons" style="margin-top:6px;">
-                  <span style="font-size:10.5px; font-weight:700; color:#b45309; background:#fef3c7; padding:2px 8px; border-radius:5px; display:inline-flex; align-items:center; gap:4px; border:1px solid #fde68a;">
+                  <span
+                    style="font-size:10.5px; font-weight:700; color:#b45309; background:#fef3c7; padding:2px 8px; border-radius:5px; display:inline-flex; align-items:center; gap:4px; border:1px solid #fde68a;">
                     <img src="/icons/cash.svg" alt="COD" style="width:12px; height:12px;" />
                     Doorstep Cash
                   </span>
@@ -3478,30 +3565,21 @@
               <div id="viewUpiContent">
                 <!-- STEP 1: QR & DEEPLINK UPI APPS (FIRST SCREEN) -->
                 <div id="upiStep1Screen">
-                  <h2 class="ypg-page-title">UPI QR Payment</h2>
-
-                  <!-- Section Label & Countdown Timer -->
-                  <div class="ypg-section-label-row">
-                    <span class="ypg-section-heading">Scan &amp; Pay via UPI</span>
-                    <div class="ypg-countdown-pill" id="activeTimerBadge">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="2.2">
-                        <circle cx="12" cy="12" r="10" />
-                        <polyline points="12 6 12 12 16 14" />
-                      </svg>
-                      <span id="activeTimerText">05:00</span>
-                    </div>
-                  </div>
-
-                  <!-- UPI Server Health Indicator & Downtime Warning -->
-                  <div class="ypg-server-health-indicator {{SERVER_HEALTH_CLASS}}" id="upiServerHealthIndicator">
+                  <!-- Hidden UPI Server Health Indicator (Preserved for tests & backend hooks) -->
+                  <div class="ypg-server-health-indicator {{SERVER_HEALTH_CLASS}}" id="upiServerHealthIndicator" style="display:none !important;">
                     <span class="ypg-pulse-dot" id="serverPulseDot"></span>
                     <span id="serverStatusLabel">{{SERVER_HEALTH_LABEL}}</span>
                   </div>
 
-                  <div class="{{DOWNTIME_ALERT_CLASS}}" id="serverDowntimeAlert" style="display:{{DOWNTIME_ALERT_STYLE}};">
+                  <div class="{{DOWNTIME_ALERT_CLASS}}" id="serverDowntimeAlert"
+                    style="display:{{DOWNTIME_ALERT_STYLE}};">
                     <div class="ypg-downtime-icon">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                        stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+                        <line x1="12" y1="9" x2="12" y2="13" />
+                        <line x1="12" y1="17" x2="12.01" y2="17" />
+                      </svg>
                     </div>
                     <div class="ypg-downtime-info">
                       <div class="ypg-downtime-heading">{{DOWNTIME_HEADING}}</div>
@@ -3535,7 +3613,8 @@
                               onerror="if(window.FALLBACK_ICONS)this.src=window.FALLBACK_ICONS.phonepe" alt="PhonePe" />
                           </div>
                           <div class="ypg-app-icon" title="Paytm"><img src="/icons/paytm.png"
-                              onerror="if(window.FALLBACK_ICONS)this.src=window.FALLBACK_ICONS.paytm" alt="Paytm" /></div>
+                              onerror="if(window.FALLBACK_ICONS)this.src=window.FALLBACK_ICONS.paytm" alt="Paytm" />
+                          </div>
                           <div class="ypg-app-icon" title="CRED"><img src="/icons/cred.png"
                               onerror="if(window.FALLBACK_ICONS)this.src=window.FALLBACK_ICONS.cred" alt="CRED" /></div>
                           <div class="ypg-app-icon" title="BHIM UPI"><img src="/icons/bhim.png"
@@ -3553,13 +3632,18 @@
                   </div>
 
                   <!-- FAST PAY: One-Click UPI App Launch -->
-                  <div class="ypg-direct-upi-apps-wrap" style="margin: 14px 0 16px 0; background: rgba(15, 23, 42, 0.6); border: 1.5px solid rgba(254, 147, 44, 0.35); border-radius: 12px; padding: 12px 14px;">
-                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
-                      <div style="font-size: 12px; font-weight: 800; color: #f8fafc; display: flex; align-items: center; gap: 6px;">
+                  <div class="ypg-direct-upi-apps-wrap"
+                    style="margin: 14px 0 16px 0; background: rgba(15, 23, 42, 0.6); border: 1.5px solid rgba(254, 147, 44, 0.35); border-radius: 12px; padding: 12px 14px;">
+                    <div
+                      style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+                      <div
+                        style="font-size: 12px; font-weight: 800; color: #f8fafc; display: flex; align-items: center; gap: 6px;">
                         <span>⚡</span>
                         <span>Direct Pay via Mobile UPI App</span>
                       </div>
-                      <span style="font-size: 10px; font-weight: 800; color: #10b981; background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); padding: 2px 7px; border-radius: 999px;">FAST CHECKOUT</span>
+                      <span
+                        style="font-size: 10px; font-weight: 800; color: #10b981; background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); padding: 2px 7px; border-radius: 999px;">FAST
+                        CHECKOUT</span>
                     </div>
 
                     <!-- 3 Direct App Buttons (Native Anchor Links for Chrome & Mobile Apps) -->
@@ -3567,21 +3651,28 @@
                       <a id="btnAppPhonePe" href="intent://#Intent;package=com.phonepe.app;scheme=phonepe;end;"
                         onclick="handleUpiAppTap(event, 'phonepe', 'PhonePe')"
                         style="text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 6px; background: #ffffff; border: 1.5px solid #5f259f; color: #5f259f; font-weight: 800; font-size: 13px; padding: 10px 4px; border-radius: 9px; cursor: pointer; transition: all 0.15s ease; box-shadow: 0 2px 6px rgba(0,0,0,0.1);">
-                        <img src="/icons/phonepe.png" onerror="if(window.FALLBACK_ICONS)this.src=window.FALLBACK_ICONS.phonepe" alt="PhonePe" style="width: 20px; height: 20px; object-fit: contain;" />
+                        <img src="/icons/phonepe.png"
+                          onerror="if(window.FALLBACK_ICONS)this.src=window.FALLBACK_ICONS.phonepe" alt="PhonePe"
+                          style="width: 20px; height: 20px; object-fit: contain;" />
                         <span>PhonePe</span>
                       </a>
 
-                      <a id="btnAppGPay" href="intent://#Intent;package=com.google.android.apps.nbu.paisa.user;scheme=gpay;end;"
+                      <a id="btnAppGPay"
+                        href="intent://#Intent;package=com.google.android.apps.nbu.paisa.user;scheme=gpay;end;"
                         onclick="handleUpiAppTap(event, 'gpay', 'Google Pay')"
                         style="text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 6px; background: #ffffff; border: 1.5px solid #1a73e8; color: #1a73e8; font-weight: 800; font-size: 13px; padding: 10px 4px; border-radius: 9px; cursor: pointer; transition: all 0.15s ease; box-shadow: 0 2px 6px rgba(0,0,0,0.1);">
-                        <img src="/icons/gpay.png" onerror="if(window.FALLBACK_ICONS)this.src=window.FALLBACK_ICONS.gpay" alt="GPay" style="width: 20px; height: 20px; object-fit: contain;" />
+                        <img src="/icons/gpay.png"
+                          onerror="if(window.FALLBACK_ICONS)this.src=window.FALLBACK_ICONS.gpay" alt="GPay"
+                          style="width: 20px; height: 20px; object-fit: contain;" />
                         <span>GPay</span>
                       </a>
 
                       <a id="btnAppPaytm" href="intent://#Intent;package=net.one97.paytm;scheme=paytmmp;end;"
                         onclick="handleUpiAppTap(event, 'paytm', 'Paytm')"
                         style="text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 6px; background: #ffffff; border: 1.5px solid #00baf2; color: #002970; font-weight: 800; font-size: 13px; padding: 10px 4px; border-radius: 9px; cursor: pointer; transition: all 0.15s ease; box-shadow: 0 2px 6px rgba(0,0,0,0.1);">
-                        <img src="/icons/paytm.png" onerror="if(window.FALLBACK_ICONS)this.src=window.FALLBACK_ICONS.paytm" alt="Paytm" style="width: 20px; height: 20px; object-fit: contain;" />
+                        <img src="/icons/paytm.png"
+                          onerror="if(window.FALLBACK_ICONS)this.src=window.FALLBACK_ICONS.paytm" alt="Paytm"
+                          style="width: 20px; height: 20px; object-fit: contain;" />
                         <span>Paytm</span>
                       </a>
                     </div>
@@ -3596,7 +3687,8 @@
 
                     <!-- Safe Alternatives -->
                     <div style="border-top: 1px dashed rgba(255, 255, 255, 0.15); padding-top: 10px; margin-top: 4px;">
-                      <div style="font-size: 11px; color: #94a3b8; margin-bottom: 8px; display: flex; align-items: center; gap: 5px;">
+                      <div
+                        style="font-size: 11px; color: #94a3b8; margin-bottom: 8px; display: flex; align-items: center; gap: 5px;">
                         <span>🛡️</span>
                         <span>Alternatives (Scan or Copy UPI ID):</span>
                       </div>
@@ -3642,52 +3734,70 @@
                 </div>
 
                 <!-- STEP 2: LIGHT THEME UTR VERIFICATION SCREEN -->
-                <div id="upiStep2Screen" style="display: none; background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 20px 20px 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); color: #0f172a; margin-top: 4px;">
+                <div id="upiStep2Screen"
+                  style="display: none; background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 20px 20px 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); color: #0f172a; margin-top: 4px;">
                   <!-- Top Row: Back button & Step badge -->
-                  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px;">
+                  <div
+                    style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px;">
                     <button type="button" onclick="showQrStepScreen()"
                       style="background: none; border: none; color: #0284c7; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 5px; padding: 4px 0;">
                       <span>←</span>
                       <span>Back to QR &amp; Apps</span>
                     </button>
-                    <div style="font-size: 11px; font-weight: 700; color: #059669; background: #ecfdf5; border: 1px solid #a7f3d0; padding: 3px 9px; border-radius: 999px; display: flex; align-items: center; gap: 4px;">
-                      <span style="width: 6px; height: 6px; border-radius: 50%; background: #10b981; display: inline-block;"></span>
+                    <div
+                      style="font-size: 11px; font-weight: 700; color: #059669; background: #ecfdf5; border: 1px solid #a7f3d0; padding: 3px 9px; border-radius: 999px; display: flex; align-items: center; gap: 4px;">
+                      <span
+                        style="width: 6px; height: 6px; border-radius: 50%; background: #10b981; display: inline-block;"></span>
                       <span>Step 2: Confirm UTR</span>
                     </div>
                   </div>
 
                   <!-- Center Icon & Title -->
                   <div style="text-align: center; margin-bottom: 16px;">
-                    <div style="width: 48px; height: 48px; border-radius: 50%; background: #eff6ff; border: 1px solid #bfdbfe; color: #2563eb; display: inline-flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 8px;">
+                    <div
+                      style="width: 48px; height: 48px; border-radius: 50%; background: #eff6ff; border: 1px solid #bfdbfe; color: #2563eb; display: inline-flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 8px;">
                       🧾
                     </div>
-                    <h3 style="font-size: 18px; font-weight: 800; color: #0f172a; margin: 0 0 4px 0;">Paste 12-Digit UTR</h3>
+                    <h3 style="font-size: 18px; font-weight: 800; color: #0f172a; margin: 0 0 4px 0;">Paste 12-Digit UTR
+                    </h3>
                     <div id="utrStepInfo" style="font-size: 12px; color: #64748b; line-height: 1.45;">
                       Enter the 12-digit UPI Reference Number / UTR generated by your UPI app to verify payment.
                     </div>
                   </div>
 
                   <!-- Amount & Payee Summary in Light Theme -->
-                  <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px 14px; margin-bottom: 14px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                      <span style="font-size: 11.5px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Amount To Pay:</span>
-                      <strong id="utrStepAmountDisplay" style="font-size: 18px; font-weight: 900; color: #0284c7; font-family: 'Roboto Mono', monospace;">₹{{AMOUNT}}</strong>
+                  <div
+                    style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px 14px; margin-bottom: 14px;">
+                    <div
+                      style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                      <span
+                        style="font-size: 11.5px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Amount
+                        To Pay:</span>
+                      <strong id="utrStepAmountDisplay"
+                        style="font-size: 18px; font-weight: 900; color: #0284c7; font-family: 'Roboto Mono', monospace;">₹{{AMOUNT}}</strong>
                     </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11.5px; color: #475569;">
+                    <div
+                      style="display: flex; justify-content: space-between; align-items: center; font-size: 11.5px; color: #475569;">
                       <span>Payee VPA:</span>
-                      <code id="utrStepVpaDisplay" style="font-weight: 700; color: #0f172a; background: #e2e8f0; padding: 2px 6px; border-radius: 4px;">{{VPA}}</code>
+                      <code id="utrStepVpaDisplay"
+                        style="font-weight: 700; color: #0f172a; background: #e2e8f0; padding: 2px 6px; border-radius: 4px;">{{VPA}}</code>
                     </div>
                   </div>
 
                   <!-- Partially Paid Banner (Light Theme) -->
                   <div id="utrPartialPaidBanner"
                     style="display: none; background: #fffbeb; border: 1.5px solid #f59e0b; border-radius: 10px; padding: 12px; margin-bottom: 12px; color: #92400e; font-size: 12px; line-height: 1.45;">
-                    <div style="font-weight: 800; color: #b45309; font-size: 13px; display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+                    <div
+                      style="font-weight: 800; color: #b45309; font-size: 13px; display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
                       <span>⚠️</span>
                       <span>Partially Paid</span>
                     </div>
-                    <div>Amount Paid: <strong id="utrPartialPaidAmt" style="color: #059669; font-family:'Roboto Mono',monospace;">₹0.00</strong> of <strong id="utrPartialTotalAmt" style="font-family:'Roboto Mono',monospace;">₹0.00</strong></div>
-                    <div>Remaining Balance: <strong id="utrPartialRemainingAmt" style="color: #dc2626; font-family:'Roboto Mono',monospace; font-size: 13px;">₹0.00</strong></div>
+                    <div>Amount Paid: <strong id="utrPartialPaidAmt"
+                        style="color: #059669; font-family:'Roboto Mono',monospace;">₹0.00</strong> of <strong
+                        id="utrPartialTotalAmt" style="font-family:'Roboto Mono',monospace;">₹0.00</strong></div>
+                    <div>Remaining Balance: <strong id="utrPartialRemainingAmt"
+                        style="color: #dc2626; font-family:'Roboto Mono',monospace; font-size: 13px;">₹0.00</strong>
+                    </div>
                     <div style="font-size: 11px; color: #78350f; margin-top: 4px;">
                       Please transfer the remaining balance and enter your new UTR below.
                     </div>
@@ -3695,11 +3805,13 @@
 
                   <!-- UTR Input Box (Light Theme) -->
                   <div style="margin-bottom: 14px;">
-                    <label for="mainUtrInput" style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                    <label for="mainUtrInput"
+                      style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 6px;">
                       12-Digit UTR / Bank Reference Number:
                     </label>
                     <div style="display: flex; gap: 8px;">
-                      <input type="text" id="mainUtrInput" placeholder="e.g. 530912345678" maxlength="22" inputmode="numeric"
+                      <input type="text" id="mainUtrInput" placeholder="e.g. 530912345678" maxlength="22"
+                        inputmode="numeric"
                         style="flex: 1; background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 8px; color: #0f172a; font-size: 15px; font-weight: 700; font-family: 'Roboto Mono', monospace; padding: 12px 14px; outline: none; transition: border-color 0.2s;"
                         onfocus="this.style.borderColor='#0284c7';" onblur="this.style.borderColor='#cbd5e1';" />
                       <button type="button" id="btnPasteUtr" onclick="pasteUtrFromClipboard()"
@@ -3718,12 +3830,16 @@
                   </button>
 
                   <!-- Status / Message Container (Light Theme) -->
-                  <div id="mainUtrStatusMsg" style="font-size: 12px; font-weight: 600; margin-top: 10px; display: none; padding: 8px 10px; border-radius: 6px;"></div>
+                  <div id="mainUtrStatusMsg"
+                    style="font-size: 12px; font-weight: 600; margin-top: 10px; display: none; padding: 8px 10px; border-radius: 6px;">
+                  </div>
 
                   <!-- Helper Tips for finding UTR in UPI Apps -->
-                  <div style="margin-top: 14px; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px; padding: 10px 12px; font-size: 11px; color: #64748b; line-height: 1.5;">
+                  <div
+                    style="margin-top: 14px; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px; padding: 10px 12px; font-size: 11px; color: #64748b; line-height: 1.5;">
                     <strong style="color: #334155;">How to pay in your app &amp; find UTR:</strong><br>
-                    • In your UPI app, tap <strong>"To UPI ID"</strong>, paste copied UPI ID &amp; pay <strong>₹{{AMOUNT}}</strong><br>
+                    • In your UPI app, tap <strong>"To UPI ID"</strong>, paste copied UPI ID &amp; pay
+                    <strong>₹{{AMOUNT}}</strong><br>
                     • Copy the 12-digit UTR / UPI Ref from payment details and paste it above!
                   </div>
                 </div>
@@ -3746,7 +3862,8 @@
                 <!-- COD Notice Pill -->
                 <div class="ypg-offers-pill" style="background:#fef3c7; border-color:#fde68a;">
                   <div class="ypg-offers-left">
-                    <div class="ypg-offer-icon-badge" style="background:#d97706; color:#fff; display:flex; align-items:center; justify-content:center;">
+                    <div class="ypg-offer-icon-badge"
+                      style="background:#d97706; color:#fff; display:flex; align-items:center; justify-content:center;">
                       <img src="/icons/cash.svg" alt="Cash" style="width:14px; height:14px;" />
                     </div>
                     <span style="color:#92400e; font-weight:700;">Pay Cash at Doorstep</span>
@@ -3839,7 +3956,8 @@
                 <h2 class="ypg-page-title">Pay with Card at Counter</h2>
                 <div style="display:flex; align-items:center; justify-content:center; gap:8px; margin:6px 0 12px 0;">
                   <img src="/icons/visa.svg" alt="Visa" style="height:16px; width:auto; object-fit:contain;" />
-                  <img src="/icons/mastercard.svg" alt="Mastercard" style="height:16px; width:auto; object-fit:contain;" />
+                  <img src="/icons/mastercard.svg" alt="Mastercard"
+                    style="height:16px; width:auto; object-fit:contain;" />
                   <img src="/icons/rupay.svg" alt="RuPay" style="height:16px; width:auto; object-fit:contain;" />
                 </div>
 
@@ -3984,22 +4102,27 @@
                     <span>Security Alert &bull; Under Investigation</span>
                   </div>
                   <div class="ypg-blocked-icon-wrap">
-                    <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                      <line x1="12" y1="8" x2="12" y2="12"/>
-                      <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="2.2"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                      <line x1="12" y1="8" x2="12" y2="12" />
+                      <line x1="12" y1="16" x2="12.01" y2="16" />
                     </svg>
                   </div>
                   <div class="ypg-blocked-title" id="blockedTitleText">Fraudulent Activity Detected</div>
-                  <div class="ypg-blocked-subtitle" id="blockedSubtitleText">Payment Session Terminated &amp; Account Suspended</div>
-                  
+                  <div class="ypg-blocked-subtitle" id="blockedSubtitleText">Payment Session Terminated &amp; Account
+                    Suspended</div>
+
                   <div class="ypg-blocked-card">
                     <p class="ypg-blocked-desc" id="blockedNoticeText">
-                      Our automated verification engine detected fraudulent payment activity associated with this transaction. Access has been immediately suspended to protect network integrity.
+                      Our automated verification engine detected fraudulent payment activity associated with this
+                      transaction. Access has been immediately suspended to protect network integrity.
                     </p>
                     <div class="ypg-blocked-investigation">
                       <span style="font-size:15px; line-height:1;">🔍</span>
-                      <span><strong>Investigation In Progress:</strong> Our fraud risk &amp; security operations team is reviewing the activity. Store administrator review is required before access can be restored.</span>
+                      <span><strong>Investigation In Progress:</strong> Our fraud risk &amp; security operations team is
+                        reviewing the activity. Store administrator review is required before access can be
+                        restored.</span>
                     </div>
                   </div>
 
@@ -4018,7 +4141,8 @@
                     <button type="button" class="ypg-btn-blocked-exit" onclick="handleBlockedExit()">
                       <span>Return to Merchant Store</span>
                     </button>
-                    <button type="button" onclick="openHelpModal()" style="background:none; border:none; color:#64748b; font-size:12px; font-weight:600; cursor:pointer; text-decoration:underline; padding:6px;">
+                    <button type="button" onclick="openHelpModal()"
+                      style="background:none; border:none; color:#64748b; font-size:12px; font-weight:600; cursor:pointer; text-decoration:underline; padding:6px;">
                       Need help? View Security Case Reference
                     </button>
                   </div>
@@ -4033,17 +4157,19 @@
                     <span>Device Security Check</span>
                   </div>
                   <div class="ypg-duplicate-icon-wrap">
-                    <svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                      <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
-                      <line x1="8" y1="21" x2="16" y2="21"/>
-                      <line x1="12" y1="17" x2="12" y2="21"/>
-                      <line x1="12" y1="7" x2="12" y2="10"/>
-                      <line x1="12" y1="13" x2="12.01" y2="13"/>
+                    <svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="2.2"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+                      <line x1="8" y1="21" x2="16" y2="21" />
+                      <line x1="12" y1="17" x2="12" y2="21" />
+                      <line x1="12" y1="7" x2="12" y2="10" />
+                      <line x1="12" y1="13" x2="12.01" y2="13" />
                     </svg>
                   </div>
                   <div class="ypg-duplicate-title" id="dupSessionTitleText">Duplicate Session Detected</div>
-                  <div class="ypg-duplicate-subtitle" id="dupSessionSubtitleText">Payment Session Active on Another Device</div>
-                  
+                  <div class="ypg-duplicate-subtitle" id="dupSessionSubtitleText">Payment Session Active on Another
+                    Device</div>
+
                   <div class="ypg-duplicate-card">
                     <p class="ypg-duplicate-desc" style="font-weight:700; color:#0f172a; margin-bottom:6px;">
                       This payment session was created on another device.
@@ -4054,7 +4180,8 @@
                   </div>
 
                   <div style="display:flex; flex-direction:column; gap:8px; width:100%; max-width:360px;">
-                    <button type="button" class="ypg-btn-duplicate-action" id="btnEndAndRestartPayment" onclick="handleEndAndStartNewPayment()">
+                    <button type="button" class="ypg-btn-duplicate-action" id="btnEndAndRestartPayment"
+                      onclick="handleEndAndStartNewPayment()">
                       <span>END SESSION &amp; START NEW PAYMENT</span>
                     </button>
                   </div>
@@ -4070,8 +4197,8 @@
 
         <!-- Legal Disclaimer -->
         <div class="ypg-legal-disclaimer" id="footerLegalDisclaimer">
-          Secured by Infravan PG & 256-Bit Bank Encryption &bull; <span style="text-decoration:underline; cursor:pointer;"
-            onclick="openHelpModal()">Privacy Notice</span>
+          Secured by Infravan PG & 256-Bit Bank Encryption &bull; <span
+            style="text-decoration:underline; cursor:pointer;" onclick="openHelpModal()">Privacy Notice</span>
         </div>
 
         <!-- Bottom Action Row: ₹5,500 View Details | Continue Button -->
@@ -4087,7 +4214,7 @@
           <!-- Continue CTA Button (Triggers Verification - only appears after 2 minutes elapsed) -->
           <button type="button" class="ypg-btn-continue" id="btnContinuePayment" onclick="submitPaymentDone()"
             style="display:none;">
-            Payment Done — Check My Payment
+            Payment Done
           </button>
         </div>
 
@@ -4151,7 +4278,8 @@
         <div
           style="width:48px; height:48px; border-radius:50%; background:#fef3c7; color:#d97706; display:flex; align-items:center; justify-content:center; font-size:24px; margin:0 auto 12px auto;">
           ⚠️</div>
-        <strong style="font-size:16px; color:#0f172a; display:block; margin-bottom:6px;" id="conflictModalTitle">Active Session Detected</strong>
+        <strong style="font-size:16px; color:#0f172a; display:block; margin-bottom:6px;" id="conflictModalTitle">Active
+          Session Detected</strong>
         <p style="font-size:12.5px; color:#475569; line-height:1.5; margin-bottom:16px;" id="conflictModalDesc">
           You already have an active payment session.
         </p>
@@ -4179,17 +4307,22 @@
         <div class="rzp-sheet-content" style="text-align:center; padding:18px 20px 24px;">
           <!-- App Header -->
           <div style="display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:12px;">
-            <img id="dlAppIcon" src="/icons/phonepe.png" onerror="if(window.FALLBACK_ICONS)this.src=window.FALLBACK_ICONS.phonepe" alt="App" style="width:28px; height:28px; object-fit:contain;" />
+            <img id="dlAppIcon" src="/icons/phonepe.png"
+              onerror="if(window.FALLBACK_ICONS)this.src=window.FALLBACK_ICONS.phonepe" alt="App"
+              style="width:28px; height:28px; object-fit:contain;" />
             <h3 id="dlAppTitle" style="font-size:18px; font-weight:800; color:#f8fafc; margin:0;">Pay with PhonePe</h3>
           </div>
 
           <!-- Crucial Amount Card (Big, High-Contrast, Glowing) -->
-          <div style="background:linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%); border:1.5px solid #fe932c; border-radius:14px; padding:16px 14px; margin-bottom:14px; box-shadow:0 6px 20px rgba(254, 147, 44, 0.2);">
-            <div style="font-size:11px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:0.8px; margin-bottom:4px;">
+          <div
+            style="background:linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%); border:1.5px solid #fe932c; border-radius:14px; padding:16px 14px; margin-bottom:14px; box-shadow:0 6px 20px rgba(254, 147, 44, 0.2);">
+            <div
+              style="font-size:11px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:0.8px; margin-bottom:4px;">
               Enter this exact amount in app:
             </div>
             <div style="display:flex; align-items:center; justify-content:center; gap:10px;">
-              <span id="dlAmountDisplay" style="font-size:36px; font-weight:900; color:#fe932c; font-family:'Roboto Mono', monospace;">₹0.00</span>
+              <span id="dlAmountDisplay"
+                style="font-size:36px; font-weight:900; color:#fe932c; font-family:'Roboto Mono', monospace;">₹0.00</span>
               <button type="button" onclick="copyAmount()"
                 style="background:rgba(254, 147, 44, 0.18); border:1px solid #fe932c; color:#fed7aa; font-weight:700; font-size:11px; padding:6px 10px; border-radius:8px; cursor:pointer; display:flex; align-items:center; gap:4px; transition:all 0.15s;">
                 <span>📋</span>
@@ -4202,17 +4335,21 @@
           </div>
 
           <!-- Instructions steps -->
-          <div style="background:rgba(15, 23, 42, 0.6); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:12px 14px; text-align:left; margin-bottom:16px; font-size:12px; color:#cbd5e1; line-height:1.5;">
+          <div
+            style="background:rgba(15, 23, 42, 0.6); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:12px 14px; text-align:left; margin-bottom:16px; font-size:12px; color:#cbd5e1; line-height:1.5;">
             <div style="display:flex; align-items:flex-start; gap:8px; margin-bottom:8px;">
-              <span style="background:#fe932c; color:#ffffff; width:18px; height:18px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:10px; font-weight:800; flex-shrink:0;">1</span>
+              <span
+                style="background:#fe932c; color:#ffffff; width:18px; height:18px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:10px; font-weight:800; flex-shrink:0;">1</span>
               <span>Tap the button below to open <strong id="dlTargetAppName">PhonePe</strong>.</span>
             </div>
             <div style="display:flex; align-items:flex-start; gap:8px; margin-bottom:8px;">
-              <span style="background:#fe932c; color:#ffffff; width:18px; height:18px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:10px; font-weight:800; flex-shrink:0;">2</span>
+              <span
+                style="background:#fe932c; color:#ffffff; width:18px; height:18px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:10px; font-weight:800; flex-shrink:0;">2</span>
               <span>Type exact amount <strong id="dlStepAmount">₹0.00</strong> (copied) & pay with PIN.</span>
             </div>
             <div style="display:flex; align-items:flex-start; gap:8px;">
-              <span style="background:#10b981; color:#ffffff; width:18px; height:18px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:10px; font-weight:800; flex-shrink:0;">✓</span>
+              <span
+                style="background:#10b981; color:#ffffff; width:18px; height:18px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:10px; font-weight:800; flex-shrink:0;">✓</span>
               <span>Return here — payment confirms <strong>automatically</strong> via bank alert!</span>
             </div>
           </div>
@@ -4226,13 +4363,16 @@
 
           <!-- Real-Time Auto-Verification & UTR Section -->
           <div style="border-top:1px dashed rgba(255, 255, 255, 0.12); padding-top:14px; text-align:center;">
-            <div style="font-size:12px; color:#10b981; font-weight:700; display:flex; align-items:center; justify-content:center; gap:6px; margin-bottom:10px;">
-              <span style="display:inline-block; width:7px; height:7px; border-radius:50%; background:#10b981; box-shadow:0 0 6px #10b981; animation:rzpHaloPulse 1.2s infinite;"></span>
+            <div
+              style="font-size:12px; color:#10b981; font-weight:700; display:flex; align-items:center; justify-content:center; gap:6px; margin-bottom:10px;">
+              <span
+                style="display:inline-block; width:7px; height:7px; border-radius:50%; background:#10b981; box-shadow:0 0 6px #10b981; animation:rzpHaloPulse 1.2s infinite;"></span>
               Waiting for automatic bank confirmation...
             </div>
 
             <!-- Optional UTR Input Form -->
-            <div style="background:rgba(30, 41, 59, 0.5); border:1px solid rgba(255,255,255,0.06); border-radius:8px; padding:10px 12px;">
+            <div
+              style="background:rgba(30, 41, 59, 0.5); border:1px solid rgba(255,255,255,0.06); border-radius:8px; padding:10px 12px;">
               <div style="font-size:11px; color:#94a3b8; margin-bottom:6px;">
                 Already paid? Enter 12-digit UPI Reference / UTR for instant verification:
               </div>
@@ -5215,10 +5355,10 @@
         popover.style.display = 'block';
         const dismissHandler = (evt) => {
           if (!popover.contains(evt.target) &&
-              !evt.target.closest('#btnProfileMenu') &&
-              !evt.target.closest('.ypg-pc-btn-more') &&
-              !evt.target.closest('#btnPcMore') &&
-              !evt.target.closest('#pcCustomerProfileRow')) {
+            !evt.target.closest('#btnProfileMenu') &&
+            !evt.target.closest('.ypg-pc-btn-more') &&
+            !evt.target.closest('#btnPcMore') &&
+            !evt.target.closest('#pcCustomerProfileRow')) {
             popover.setAttribute('hidden', '');
             popover.hidden = true;
             popover.style.display = 'none';
@@ -5501,9 +5641,13 @@
               runCountdown(resData.timeRemainingSeconds || 300, sec => {
                 const el = document.getElementById('activeTimerText');
                 if (el) el.textContent = formatTime(sec);
+                const elPc = document.getElementById('activeTimerTextPc');
+                if (elPc) elPc.textContent = formatTime(sec);
               }, () => {
                 const el = document.getElementById('activeTimerText');
                 if (el) el.textContent = 'Expired';
+                const elPc = document.getElementById('activeTimerTextPc');
+                if (elPc) elPc.textContent = 'Expired';
                 fetch(`${API_BASE}/api/v1/checkout/${PAYMENT_ID}/expire`, { method: 'POST' }).catch(() => { });
                 loadState();
               });
@@ -5611,7 +5755,7 @@
             tx.oncomplete = () => resolve();
             tx.onerror = () => resolve();
           });
-        } catch {}
+        } catch { }
       },
 
       collectSignals() {
@@ -5625,7 +5769,7 @@
           ctx.font = "14px 'Arial'";
           ctx.fillText('YouPI-PG-Device-Binding-2026', 2, 2);
           canvasSig = canvas.toDataURL().slice(-32);
-        } catch {}
+        } catch { }
 
         let webglRenderer = '';
         try {
@@ -5634,7 +5778,7 @@
             const dbg = gl.getExtension('WEBGL_debug_renderer_info');
             if (dbg) webglRenderer = gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL);
           }
-        } catch {}
+        } catch { }
 
         return {
           userAgent: navigator.userAgent || '',
@@ -6205,7 +6349,7 @@
                   window.parent.postMessage({ event: 'youpi.close', redirectUrl: storeUrl }, '*');
                   window.parent.postMessage({ event: 'youpi.cancel', redirectUrl: storeUrl }, '*');
                   window.parent.postMessage({ event: 'youpi.payment_cancelled', redirectUrl: storeUrl }, '*');
-                } catch (e) {}
+                } catch (e) { }
               } else if (storeUrl && storeUrl !== '#' && !storeUrl.startsWith('javascript:')) {
                 window.location.href = storeUrl;
               } else {
@@ -6307,7 +6451,7 @@
 
       // Auto-bind customer to payment session helper
       if (typeof autoBindCustomerToSession !== 'function') {
-        window.autoBindCustomerToSession = async function(customerId, token) {
+        window.autoBindCustomerToSession = async function (customerId, token) {
           if (window.isAutoBindingSession || !PAYMENT_ID || !token || !customerId) return;
           window.isAutoBindingSession = true;
           try {
@@ -6444,6 +6588,8 @@
           if (remainingSec <= 0 && data.status === 'ACTIVE') {
             const tText = document.getElementById('activeTimerText');
             if (tText) tText.textContent = 'Expired';
+            const tTextPc = document.getElementById('activeTimerTextPc');
+            if (tTextPc) tTextPc.textContent = 'Expired';
             if (btnContinue) btnContinue.style.display = 'none';
             return;
           }
@@ -6458,6 +6604,8 @@
           runCountdown(remainingSec, sec => {
             const tText = document.getElementById('activeTimerText');
             if (tText) tText.textContent = formatTime(sec);
+            const tTextPc = document.getElementById('activeTimerTextPc');
+            if (tTextPc) tTextPc.textContent = formatTime(sec);
 
             // "Payment Done — Check My Payment" button appears after 4:00
             if (sec <= 240 && btnContinue) {
@@ -6468,6 +6616,8 @@
           }, () => {
             const tText = document.getElementById('activeTimerText');
             if (tText) tText.textContent = 'Expired';
+            const tTextPc = document.getElementById('activeTimerTextPc');
+            if (tTextPc) tTextPc.textContent = 'Expired';
             if (btnContinue) btnContinue.style.display = 'none';
             closeProcessingModal();
             fetch(`${API_BASE}/api/v1/checkout/${PAYMENT_ID}/expire`, { method: 'POST' }).catch(() => { });
@@ -6594,7 +6744,7 @@
               container.innerHTML = svg;
             }
           }
-        } catch (e) {}
+        } catch (e) { }
       }, 400);
     }
 
@@ -6802,7 +6952,7 @@
       closeCancelPaymentModal();
       if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null; }
       if (queuePollTimer) { clearInterval(queuePollTimer); queuePollTimer = null; }
-      
+
       const bar = document.getElementById('paymentMethodSelectorBar');
       if (bar) bar.style.display = 'none';
       const footer = document.getElementById('ypgStickyFooter');
@@ -6858,7 +7008,7 @@
             paymentId: data.id || PAYMENT_ID
           }
         }, '*');
-      } catch (e) {}
+      } catch (e) { }
     }
 
     function handleBlockedExit() {
@@ -6869,7 +7019,7 @@
             event: 'youpi.payment_blocked_exit',
             data: { status: 'BLOCKED', isBanned: true, orderId: state?.orderId }
           }, '*');
-        } catch (e) {}
+        } catch (e) { }
       }
       window.location.href = failRedirectUrl;
     }
@@ -6879,7 +7029,7 @@
       lastDuplicateSessionPayload = data;
       if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null; }
       if (queuePollTimer) { clearInterval(queuePollTimer); queuePollTimer = null; }
-      if (sse) { try { sse.close(); } catch(e){} sse = null; }
+      if (sse) { try { sse.close(); } catch (e) { } sse = null; }
 
       const bar = document.getElementById('paymentMethodSelectorBar');
       if (bar) bar.style.display = 'none';
@@ -7155,7 +7305,7 @@
         if (window.parent && window.parent !== window) {
           window.parent.postMessage({ event: 'youpi.open_upi_url', url: uri, fallback: fallback }, '*');
         }
-      } catch (e) {}
+      } catch (e) { }
 
       // Method 1: Invisible anchor click with no target (or _top)
       try {
@@ -7167,7 +7317,7 @@
         document.body.appendChild(a);
         a.click();
         setTimeout(() => {
-          try { document.body.removeChild(a); } catch {}
+          try { document.body.removeChild(a); } catch { }
         }, 1000);
       } catch (err) {
         console.warn('Anchor intent dispatch error:', err);
@@ -7177,7 +7327,7 @@
       setTimeout(() => {
         try {
           window.location.href = uri;
-        } catch (e) {}
+        } catch (e) { }
       }, 50);
 
       // Method 3: Fallback scheme after 1200ms if primary app did not open and page is still focused
@@ -7192,11 +7342,11 @@
               fb.style.display = 'none';
               document.body.appendChild(fb);
               fb.click();
-              setTimeout(() => { try { document.body.removeChild(fb); } catch {} }, 1000);
-            } catch (e) {}
+              setTimeout(() => { try { document.body.removeChild(fb); } catch { } }, 1000);
+            } catch (e) { }
             try {
               window.location.href = fallback;
-            } catch (e) {}
+            } catch (e) { }
           }
         }, 1200);
       }
@@ -7234,7 +7384,7 @@
           const href = e?.currentTarget?.href || (provider === 'phonepe' ? 'intent://#Intent;package=com.phonepe.app;scheme=phonepe;end;' : 'upi://pay');
           window.parent.postMessage({ event: 'youpi.open_upi_url', url: href }, '*');
         }
-      } catch (err) {}
+      } catch (err) { }
     }
 
     function openUpiApp(provider) {
@@ -7304,7 +7454,7 @@
             return;
           }
         }
-      } catch {}
+      } catch { }
       input.focus();
       if (typeof showOptionToast === 'function') {
         showOptionToast('Please tap in the box and paste your 12-digit UTR');
@@ -7527,7 +7677,7 @@
         canvas.height = 600;
         const ctx = canvas.getContext('2d');
         const img = new Image();
-        img.onload = function() {
+        img.onload = function () {
           ctx.fillStyle = '#ffffff';
           ctx.fillRect(0, 0, 600, 600);
           ctx.drawImage(img, 40, 40, 520, 520);
@@ -7598,7 +7748,7 @@
         const anyBtn = document.getElementById('btnAppAny');
         if (anyBtn) anyBtn.href = 'upi://pay';
       }
-    } catch (e) {}
+    } catch (e) { }
 
     loadState();
     connectSse();
