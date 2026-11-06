@@ -3562,33 +3562,37 @@
                       <span style="font-size: 10px; font-weight: 800; color: #10b981; background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); padding: 2px 7px; border-radius: 999px;">FAST CHECKOUT</span>
                     </div>
 
-                    <!-- 3 Direct App Buttons -->
+                    <!-- 3 Direct App Buttons (Native Anchor Links for Chrome & Mobile Apps) -->
                     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 8px;">
-                      <button type="button" class="ypg-intent-btn" onclick="openUpiApp('phonepe')"
-                        style="display: flex; align-items: center; justify-content: center; gap: 6px; background: #ffffff; border: 1.5px solid #5f259f; color: #5f259f; font-weight: 800; font-size: 13px; padding: 10px 4px; border-radius: 9px; cursor: pointer; transition: all 0.15s ease; box-shadow: 0 2px 6px rgba(0,0,0,0.1);">
+                      <a id="btnAppPhonePe" href="intent://#Intent;package=com.phonepe.app;scheme=phonepe;end;"
+                        onclick="handleUpiAppTap(event, 'phonepe', 'PhonePe')"
+                        style="text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 6px; background: #ffffff; border: 1.5px solid #5f259f; color: #5f259f; font-weight: 800; font-size: 13px; padding: 10px 4px; border-radius: 9px; cursor: pointer; transition: all 0.15s ease; box-shadow: 0 2px 6px rgba(0,0,0,0.1);">
                         <img src="/icons/phonepe.png" onerror="if(window.FALLBACK_ICONS)this.src=window.FALLBACK_ICONS.phonepe" alt="PhonePe" style="width: 20px; height: 20px; object-fit: contain;" />
                         <span>PhonePe</span>
-                      </button>
+                      </a>
 
-                      <button type="button" class="ypg-intent-btn" onclick="openUpiApp('gpay')"
-                        style="display: flex; align-items: center; justify-content: center; gap: 6px; background: #ffffff; border: 1.5px solid #1a73e8; color: #1a73e8; font-weight: 800; font-size: 13px; padding: 10px 4px; border-radius: 9px; cursor: pointer; transition: all 0.15s ease; box-shadow: 0 2px 6px rgba(0,0,0,0.1);">
+                      <a id="btnAppGPay" href="intent://#Intent;package=com.google.android.apps.nbu.paisa.user;scheme=gpay;end;"
+                        onclick="handleUpiAppTap(event, 'gpay', 'Google Pay')"
+                        style="text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 6px; background: #ffffff; border: 1.5px solid #1a73e8; color: #1a73e8; font-weight: 800; font-size: 13px; padding: 10px 4px; border-radius: 9px; cursor: pointer; transition: all 0.15s ease; box-shadow: 0 2px 6px rgba(0,0,0,0.1);">
                         <img src="/icons/gpay.png" onerror="if(window.FALLBACK_ICONS)this.src=window.FALLBACK_ICONS.gpay" alt="GPay" style="width: 20px; height: 20px; object-fit: contain;" />
                         <span>GPay</span>
-                      </button>
+                      </a>
 
-                      <button type="button" class="ypg-intent-btn" onclick="openUpiApp('paytm')"
-                        style="display: flex; align-items: center; justify-content: center; gap: 6px; background: #ffffff; border: 1.5px solid #00baf2; color: #002970; font-weight: 800; font-size: 13px; padding: 10px 4px; border-radius: 9px; cursor: pointer; transition: all 0.15s ease; box-shadow: 0 2px 6px rgba(0,0,0,0.1);">
+                      <a id="btnAppPaytm" href="intent://#Intent;package=net.one97.paytm;scheme=paytmmp;end;"
+                        onclick="handleUpiAppTap(event, 'paytm', 'Paytm')"
+                        style="text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 6px; background: #ffffff; border: 1.5px solid #00baf2; color: #002970; font-weight: 800; font-size: 13px; padding: 10px 4px; border-radius: 9px; cursor: pointer; transition: all 0.15s ease; box-shadow: 0 2px 6px rgba(0,0,0,0.1);">
                         <img src="/icons/paytm.png" onerror="if(window.FALLBACK_ICONS)this.src=window.FALLBACK_ICONS.paytm" alt="Paytm" style="width: 20px; height: 20px; object-fit: contain;" />
                         <span>Paytm</span>
-                      </button>
+                      </a>
                     </div>
 
                     <!-- Any UPI App Button -->
-                    <button type="button" class="ypg-intent-btn" onclick="openUpiApp('any')"
-                      style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, #fe932c 0%, #ea580c 100%); border: none; color: #ffffff; font-weight: 800; font-size: 13px; padding: 10px 12px; border-radius: 9px; cursor: pointer; transition: all 0.15s ease; box-shadow: 0 4px 12px rgba(254,147,44,0.35); margin-bottom: 10px;">
+                    <a id="btnAppAny" href="intent://#Intent;action=android.intent.action.VIEW;data=upi://pay;end;"
+                      onclick="handleUpiAppTap(event, 'any', 'Any UPI App')"
+                      style="text-decoration: none; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, #fe932c 0%, #ea580c 100%); border: none; color: #ffffff; font-weight: 800; font-size: 13px; padding: 10px 12px; border-radius: 9px; cursor: pointer; transition: all 0.15s ease; box-shadow: 0 4px 12px rgba(254,147,44,0.35); margin-bottom: 10px; box-sizing: border-box;">
                       <span>🚀</span>
                       <span id="btnAnyUpiText">Tap to Open in Any UPI App</span>
-                    </button>
+                    </a>
 
                     <!-- Safe Alternatives -->
                     <div style="border-top: 1px dashed rgba(255, 255, 255, 0.15); padding-top: 10px; margin-top: 4px;">
@@ -7198,40 +7202,10 @@
       }
     }
 
-    function openUpiApp(provider) {
+    function handleUpiAppTap(e, provider, targetName) {
       const rawVpa = (state && (state.payeeVpa || state.vpa)) || '{{VPA}}';
       const cleanVpa = String(rawVpa).trim();
-      const rawName = (state && state.merchantName) || '{{MERCHANT_NAME}}';
-      const cleanName = String(rawName).trim();
       const amount = (state && state.amount) || '{{AMOUNT}}';
-
-      const isAndroid = /android/i.test(navigator.userAgent || '');
-      const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent || '');
-
-      let targetName = 'PhonePe';
-      let launcherUri = '';
-      let fallbackUri = '';
-
-      if (provider === 'phonepe') {
-        targetName = 'PhonePe';
-        launcherUri = 'phonepe://';
-        fallbackUri = isAndroid ? 'intent://#Intent;scheme=phonepe;package=com.phonepe.app;end;' : 'phonepe://';
-      } else if (provider === 'gpay') {
-        targetName = 'Google Pay';
-        launcherUri = 'gpay://';
-        fallbackUri = isAndroid ? 'intent://#Intent;scheme=gpay;package=com.google.android.apps.nbu.paisa.user;end;' : 'gpay://';
-      } else if (provider === 'paytm') {
-        targetName = 'Paytm';
-        launcherUri = 'paytmmp://';
-        fallbackUri = isAndroid ? 'intent://#Intent;scheme=paytmmp;package=net.one97.paytm;end;' : 'paytmmp://';
-      } else {
-        targetName = 'Any UPI App';
-        launcherUri = 'upi://pay';
-        fallbackUri = 'upi://pay';
-      }
-
-      currentTargetUri = launcherUri;
-      currentFallbackUri = fallbackUri;
 
       // 1. Copy UPI ID immediately to clipboard
       if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -7254,7 +7228,39 @@
         stepInfo.innerHTML = `✅ <strong>UPI ID copied:</strong> <code style="background:#e0f2fe; color:#0369a1; padding:2px 6px; border-radius:4px; font-weight:700;">${cleanVpa}</code><br>Opening ${targetName}... In ${targetName}, tap <strong>"To UPI ID"</strong>, paste UPI ID, transfer <strong>₹${amount}</strong> and enter your <strong>12-digit UTR</strong> below:`;
       }
 
-      // 4. Launch the target UPI app directly!
+      // 4. If embedded in iframe (youpi.js modal), inform parent window to also handle intent/URL directly
+      try {
+        if (window.parent && window.parent !== window) {
+          const href = e?.currentTarget?.href || (provider === 'phonepe' ? 'intent://#Intent;package=com.phonepe.app;scheme=phonepe;end;' : 'upi://pay');
+          window.parent.postMessage({ event: 'youpi.open_upi_url', url: href }, '*');
+        }
+      } catch (err) {}
+    }
+
+    function openUpiApp(provider) {
+      let targetName = 'PhonePe';
+      if (provider === 'gpay') targetName = 'Google Pay';
+      else if (provider === 'paytm') targetName = 'Paytm';
+      else if (provider === 'any') targetName = 'Any UPI App';
+
+      handleUpiAppTap(null, provider, targetName);
+
+      const isAndroid = /android/i.test(navigator.userAgent || '');
+      let launcherUri = 'phonepe://';
+      let fallbackUri = 'phonepe://';
+      if (provider === 'phonepe') {
+        launcherUri = isAndroid ? 'intent://#Intent;package=com.phonepe.app;scheme=phonepe;end;' : 'phonepe://';
+        fallbackUri = 'phonepe://';
+      } else if (provider === 'gpay') {
+        launcherUri = isAndroid ? 'intent://#Intent;package=com.google.android.apps.nbu.paisa.user;scheme=gpay;end;' : 'gpay://';
+        fallbackUri = 'gpay://';
+      } else if (provider === 'paytm') {
+        launcherUri = isAndroid ? 'intent://#Intent;package=net.one97.paytm;scheme=paytmmp;end;' : 'paytmmp://';
+        fallbackUri = 'paytmmp://';
+      } else {
+        launcherUri = isAndroid ? 'intent://#Intent;action=android.intent.action.VIEW;data=upi://pay;end;' : 'upi://pay';
+        fallbackUri = 'upi://pay';
+      }
       dispatchUpiIntent(launcherUri, fallbackUri);
     }
 
@@ -7579,6 +7585,20 @@
       document.execCommand('copy');
       document.body.removeChild(ta);
     }
+
+    try {
+      const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent || '');
+      if (isIOS) {
+        const pBtn = document.getElementById('btnAppPhonePe');
+        if (pBtn) pBtn.href = 'phonepe://';
+        const gBtn = document.getElementById('btnAppGPay');
+        if (gBtn) gBtn.href = 'gpay://';
+        const paytmBtn = document.getElementById('btnAppPaytm');
+        if (paytmBtn) paytmBtn.href = 'paytmmp://';
+        const anyBtn = document.getElementById('btnAppAny');
+        if (anyBtn) anyBtn.href = 'upi://pay';
+      }
+    } catch (e) {}
 
     loadState();
     connectSse();
