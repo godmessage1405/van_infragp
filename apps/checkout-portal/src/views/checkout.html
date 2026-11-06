@@ -3718,24 +3718,9 @@
 
                   <!-- Helper Tips for finding UTR in UPI Apps -->
                   <div style="margin-top: 14px; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px; padding: 10px 12px; font-size: 11px; color: #64748b; line-height: 1.5;">
-                    <strong style="color: #334155;">Where to find 12-digit UTR in your app?</strong><br>
-                    • <strong>PhonePe</strong>: History ➔ Tap transaction ➔ Look for "UTR: 123456789012"<br>
-                    • <strong>Google Pay</strong>: Tap transaction ➔ "UPI transaction ID: 1234..."<br>
-                    • <strong>Paytm</strong>: Tap payment ➔ "UPI Ref No: 1234..."
-                  </div>
-                </div>
-              </div>
-                  <div class="ypg-instruction-step">
-                    <div class="ypg-step-num">1</div>
-                    <div>Open any UPI App on your phone (Google Pay, PhonePe, Paytm, CRED).</div>
-                  </div>
-                  <div class="ypg-instruction-step">
-                    <div class="ypg-step-num">2</div>
-                    <div>Scan the QR code above and complete the payment of <strong>₹{{AMOUNT}}</strong>.</div>
-                  </div>
-                  <div class="ypg-instruction-step">
-                    <div class="ypg-step-num">3</div>
-                    <div>Payment is detected automatically, or tap <strong>Continue</strong> below after paying.</div>
+                    <strong style="color: #334155;">How to pay in your app &amp; find UTR:</strong><br>
+                    • In your UPI app, tap <strong>"To UPI ID"</strong>, paste copied UPI ID &amp; pay <strong>₹{{AMOUNT}}</strong><br>
+                    • Copy the 12-digit UTR / UPI Ref from payment details and paste it above!
                   </div>
                 </div>
               </div>
@@ -7227,32 +7212,22 @@
       let launcherUri = '';
       let fallbackUri = '';
 
-      const upiQuery = `pa=${encodeURIComponent(cleanVpa)}&pn=${encodeURIComponent(cleanName)}&cu=INR`;
-
       if (provider === 'phonepe') {
         targetName = 'PhonePe';
-        launcherUri = isAndroid
-          ? `intent://pay?${upiQuery}#Intent;scheme=upi;package=com.phonepe.app;end;`
-          : `phonepe://pay?${upiQuery}`;
-        fallbackUri = isAndroid ? `phonepe://pay?${upiQuery}` : `phonepe://`;
+        launcherUri = 'phonepe://';
+        fallbackUri = isAndroid ? 'intent://#Intent;scheme=phonepe;package=com.phonepe.app;end;' : 'phonepe://';
       } else if (provider === 'gpay') {
         targetName = 'Google Pay';
-        launcherUri = isAndroid
-          ? `intent://pay?${upiQuery}#Intent;scheme=upi;package=com.google.android.apps.nbu.paisa.user;end;`
-          : `gpay://upi/pay?${upiQuery}`;
-        fallbackUri = `upi://pay?${upiQuery}`;
+        launcherUri = 'gpay://';
+        fallbackUri = isAndroid ? 'intent://#Intent;scheme=gpay;package=com.google.android.apps.nbu.paisa.user;end;' : 'gpay://';
       } else if (provider === 'paytm') {
         targetName = 'Paytm';
-        launcherUri = isAndroid
-          ? `intent://pay?${upiQuery}#Intent;scheme=upi;package=net.one97.paytm;end;`
-          : `paytmmp://pay?${upiQuery}`;
-        fallbackUri = isAndroid ? `paytmmp://pay?${upiQuery}` : `paytmmp://`;
+        launcherUri = 'paytmmp://';
+        fallbackUri = isAndroid ? 'intent://#Intent;scheme=paytmmp;package=net.one97.paytm;end;' : 'paytmmp://';
       } else {
         targetName = 'Any UPI App';
-        launcherUri = isAndroid
-          ? `intent://pay?${upiQuery}#Intent;scheme=upi;end;`
-          : `upi://pay?${upiQuery}`;
-        fallbackUri = `upi://pay?${upiQuery}`;
+        launcherUri = 'upi://pay';
+        fallbackUri = 'upi://pay';
       }
 
       currentTargetUri = launcherUri;
@@ -7269,14 +7244,14 @@
 
       // 2. Show clear guidance toast
       if (typeof showOptionToast === 'function') {
-        showOptionToast(`📋 Copied UPI ID: ${cleanVpa}! Opening ${targetName}... In ${targetName}, transfer ₹${amount} & enter 12-digit UTR on the next screen.`);
+        showOptionToast(`📋 Copied UPI ID: ${cleanVpa}! Opening ${targetName}... Tap "To UPI ID", pay ₹${amount} & enter UTR below.`);
       }
 
       // 3. Switch smoothly to Step 2 (Light Theme UTR Screen) so it's ready when user returns
       showUtrStepScreen();
       const stepInfo = document.getElementById('utrStepInfo');
       if (stepInfo) {
-        stepInfo.innerHTML = `✅ <strong>UPI ID copied:</strong> <code style="background:#e0f2fe; color:#0369a1; padding:2px 6px; border-radius:4px; font-weight:700;">${cleanVpa}</code><br>Opening ${targetName}... In ${targetName}, transfer <strong>₹${amount}</strong> and enter your <strong>12-digit UTR</strong> below:`;
+        stepInfo.innerHTML = `✅ <strong>UPI ID copied:</strong> <code style="background:#e0f2fe; color:#0369a1; padding:2px 6px; border-radius:4px; font-weight:700;">${cleanVpa}</code><br>Opening ${targetName}... In ${targetName}, tap <strong>"To UPI ID"</strong>, paste UPI ID, transfer <strong>₹${amount}</strong> and enter your <strong>12-digit UTR</strong> below:`;
       }
 
       // 4. Launch the target UPI app directly!
